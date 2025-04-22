@@ -76,15 +76,23 @@ class TransactionsListFragment : Fragment() {
     private fun addSampleDataIfNeeded() {
         val currentTransactions = SharedPreferencesManager.loadTransactions()
         if (currentTransactions.isEmpty()) {
-            val sampleTransactions = listOf(
-                Transaction(amount = 1500.0, type = TransactionType.EXPENSE, category = "Продукты", description = "Молоко, хлеб", date = Date()),
-                Transaction(amount = 50000.0, type = TransactionType.INCOME, category = "Зарплата", description = "Аванс", date = Date(System.currentTimeMillis() - 86400000 * 2)), // 2 дня назад
-                Transaction(amount = 350.0, type = TransactionType.EXPENSE, category = "Транспорт", description = "Метро", date = Date(System.currentTimeMillis() - 86400000)), // Вчера
-                Transaction(amount = 2000.0, type = TransactionType.EXPENSE, category = "Развлечения", description = "Кино", date = Date()),
-                Transaction(amount = 10000.0, type = TransactionType.INCOME, category = "Фриланс", description = null, date = Date())
-            )
+            // Получаем ID дефолтных категорий (пример)
+            val categoryProducts = SharedPreferencesManager.getCategoriesByType(TransactionType.EXPENSE).find { it.name == "Продукты" }
+            val categorySalary = SharedPreferencesManager.getCategoriesByType(TransactionType.INCOME).find { it.name == "Зарплата" }
+            val categoryTransport = SharedPreferencesManager.getCategoriesByType(TransactionType.EXPENSE).find { it.name == "Транспорт" }
+            val categoryFun = SharedPreferencesManager.getCategoriesByType(TransactionType.EXPENSE).find { it.name == "Развлечения" }
+            val categoryFreelance = SharedPreferencesManager.getCategoriesByType(TransactionType.INCOME).find { it.name == "Фриланс" }
+
+            // Создаем транзакции с categoryId (только если категории найдены)
+            val sampleTransactions = mutableListOf<Transaction>()
+            categoryProducts?.let { sampleTransactions.add(Transaction(amount = 1500.0, type = TransactionType.EXPENSE, categoryId = it.id, description = "Молоко, хлеб", date = Date())) }
+            categorySalary?.let { sampleTransactions.add(Transaction(amount = 50000.0, type = TransactionType.INCOME, categoryId = it.id, description = "Аванс", date = Date(System.currentTimeMillis() - 86400000 * 2))) }
+            categoryTransport?.let { sampleTransactions.add(Transaction(amount = 350.0, type = TransactionType.EXPENSE, categoryId = it.id, description = "Метро", date = Date(System.currentTimeMillis() - 86400000))) }
+            categoryFun?.let { sampleTransactions.add(Transaction(amount = 2000.0, type = TransactionType.EXPENSE, categoryId = it.id, description = "Кино", date = Date())) }
+            categoryFreelance?.let { sampleTransactions.add(Transaction(amount = 10000.0, type = TransactionType.INCOME, categoryId = it.id, description = null, date = Date())) }
+
+
             sampleTransactions.forEach { SharedPreferencesManager.addTransaction(it) }
-            // Перезагружаем данные после добавления
             loadTransactions()
         }
     }

@@ -33,7 +33,7 @@
                 android:layout_weight="1"
                 android:layout_height="wrap_content"
                 android:text="Расход"
-                android:checked="true"/> <!-- По умолчанию расход -->
+                android:checked="true"/>
 
             <RadioButton
                 android:id="@+id/radio_income"
@@ -59,23 +59,26 @@
                 android:inputType="numberDecimal" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Категория -->
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/input_layout_category"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            android:layout_width="match_parent"
+        <!-- Категория (новый вариант со Spinner) -->
+        <TextView
+            android:id="@+id/label_category"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:hint="Категория">
-            <!-- Пока простое поле ввода, позже можно заменить на Spinner или AutoComplete -->
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/edit_text_category"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="textCapSentences" />
-        </com.google.android.material.textfield.TextInputLayout>
+            android:text="Категория:"
+            android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1"/>
 
-        <!-- Дата -->
+        <Spinner
+            android:id="@+id/spinner_category"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:minHeight="48dp"
+            style="@style/Widget.AppCompat.Spinner.Underlined" />
+
+
+        <!-- ======================================= -->
+        <!-- === Добавьте этот блок для Даты === -->
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/input_layout_date"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
@@ -91,6 +94,8 @@
                 android:inputType="none"
                 android:focusable="false"  /> <!-- Делаем нередактируемым, клик будет открывать DatePicker -->
         </com.google.android.material.textfield.TextInputLayout>
+        <!-- ======================================= -->
+
 
         <!-- Описание (необязательное) -->
         <com.google.android.material.textfield.TextInputLayout
@@ -108,6 +113,17 @@
                 android:inputType="textCapSentences|textMultiLine"
                 android:minLines="2" />
         </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/button_save_transaction"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="Сохранить транзакцию"
+            android:paddingTop="12dp"
+            android:paddingBottom="12dp"
+            app:icon="@drawable/ic_save"
+            app:iconGravity="textStart" />
 
     </LinearLayout>
 </androidx.core.widget.NestedScrollView>

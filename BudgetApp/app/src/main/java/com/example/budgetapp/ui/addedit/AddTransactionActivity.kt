@@ -1,11 +1,11 @@
 package com.example.budgetapp.ui.addedit
 
 import android.os.Bundle
-import android.view.Menu
-import android.view.MenuItem
+
 import androidx.appcompat.app.AppCompatActivity
 import com.example.budgetapp.R
 import com.example.budgetapp.databinding.ActivityAddTransactionBinding
+import androidx.core.view.WindowCompat
 
 class AddTransactionActivity : AppCompatActivity() {
 
@@ -14,6 +14,9 @@ class AddTransactionActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        WindowCompat.setDecorFitsSystemWindows(window, true)
+
         binding = ActivityAddTransactionBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -38,23 +41,5 @@ class AddTransactionActivity : AppCompatActivity() {
     override fun onSupportNavigateUp(): Boolean {
         finish() // Просто закрываем Activity
         return true
-    }
-
-    // --- Создание меню в Toolbar (для кнопки "Сохранить") ---
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.menu_save, menu) // Создадим menu_save.xml
-        return true
-    }
-
-    // --- Обработка нажатия на элементы меню (на кнопку "Сохранить") ---
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            R.id.action_save -> {
-                // Вызываем метод сохранения во фрагменте
-                formFragment.saveTransaction()
-                true // Событие обработано
-            }
-            else -> super.onOptionsItemSelected(item)
-        }
     }
 }

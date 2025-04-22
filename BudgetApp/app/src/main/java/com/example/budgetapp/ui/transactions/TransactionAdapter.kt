@@ -6,9 +6,12 @@ import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.example.budgetapp.R
+import com.example.budgetapp.SharedPreferencesManager
 import com.example.budgetapp.databinding.ItemTransactionBinding // Импорт ViewBinding для элемента списка
+import com.example.budgetapp.model.Category
 import com.example.budgetapp.model.Transaction
 import com.example.budgetapp.model.TransactionType
+import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -20,63 +23,75 @@ class TransactionAdapter(
     // Форматтер для даты
     private val dateFormat = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
 
-    // Создает ViewHolder (когда RecyclerView нужен новый элемент)
+    private val currencyFormatter: NumberFormat = NumberFormat.getCurrencyInstance(Locale("ru", "RU"))
+
+    // Кэш для загруженных категорий, чтобы не дергать SharedPreferences для каждого элемента
+    private var categoriesMap: Map<String, Category> = mapOf()
+
+    // Перезагружаем кэш категорий при обновлении данных адаптера
+    init {
+        reloadCategoriesCache()
+    }
+
+    private fun reloadCategoriesCache() {
+        categoriesMap = SharedPreferencesManager.loadCategories().associateBy { it.id }
+    }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TransactionViewHolder {
         // Используем ViewBinding для inflate макета элемента
         val binding = ItemTransactionBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return TransactionViewHolder(binding)
     }
 
-    // Связывает данные (transaction) с ViewHolder (элементом списка)
     override fun onBindViewHolder(holder: TransactionViewHolder, position: Int) {
         val transaction = transactions[position]
-        holder.bind(transaction)
+        // Получаем категорию из кэша
+        val category = categoriesMap[transaction.categoryId]
+        holder.bind(transaction, category) // Передаем и транзакцию, и категорию
     }
 
-    // Возвращает общее количество элементов в списке
     override fun getItemCount(): Int = transactions.size
 
-    // Функция для обновления данных в адаптере
+    // Обновляем данные и кэш категорий
     fun updateData(newTransactions: List<Transaction>) {
         transactions = newTransactions
-        notifyDataSetChanged() // Уведомляем RecyclerView, что данные изменились (простой способ)
-        // Для лучшей производительности позже можно использовать DiffUtil
+        reloadCategoriesCache() // Обновляем кэш категорий на случай их изменения
+        notifyDataSetChanged()
     }
 
-    // ViewHolder - хранит ссылки на View внутри элемента списка
     inner class TransactionViewHolder(private val binding: ItemTransactionBinding) : RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(transaction: Transaction) {
-            binding.textTransactionCategory.text = transaction.category
-            binding.textTransactionAmount.text = formatAmount(transaction.amount) // Форматируем сумму
+        // Теперь bind принимает и категорию
+        fun bind(transaction: Transaction, category: Category?) {
+            // Отображаем имя категории или "Категория не найдена", если что-то пошло не так
+            binding.textTransactionCategory.text = category?.name ?: "Категория?"
+            binding.textTransactionAmount.text = formatAmount(transaction.amount, transaction.type) // Передаем тип для знака +/-
 
-            // Устанавливаем описание или дату, если описания нет
             binding.textTransactionDetail.text = if (!transaction.description.isNullOrBlank()) {
                 transaction.description
             } else {
                 dateFormat.format(transaction.date)
             }
 
-            // Устанавливаем иконку и цвет суммы в зависимости от типа
             when (transaction.type) {
                 TransactionType.INCOME -> {
                     binding.imageTransactionType.setImageResource(R.drawable.ic_income)
-                    binding.textTransactionAmount.setTextColor(ContextCompat.getColor(context, R.color.income_color)) // Определим цвет в colors.xml
+                    binding.textTransactionAmount.setTextColor(ContextCompat.getColor(context, R.color.income_color))
                 }
                 TransactionType.EXPENSE -> {
                     binding.imageTransactionType.setImageResource(R.drawable.ic_expense)
-                    binding.textTransactionAmount.setTextColor(ContextCompat.getColor(context, R.color.expense_color)) // Определим цвет в colors.xml
+                    binding.textTransactionAmount.setTextColor(ContextCompat.getColor(context, R.color.expense_color))
                 }
             }
-
-            // TODO: Добавить обработчик клика на элемент (itemView.setOnClickListener { ... })
-            // для перехода к деталям транзакции
+            // TODO: Добавить обработчик клика
         }
 
-        // Вспомогательная функция для форматирования суммы (можно улучшить)
-        private fun formatAmount(amount: Double): String {
-            // Можно добавить символ валюты из настроек позже
-            return String.format(Locale.getDefault(), "%.2f ₽", amount)
+        // Обновляем formatAmount для добавления знака +/-
+        private fun formatAmount(amount: Double, type: TransactionType): String {
+            val sign = if (type == TransactionType.EXPENSE) "-" else "+"
+            // Используем Math.abs чтобы сумма всегда была положительной, знак добавляем сами
+            val formattedAmount = currencyFormatter.format(kotlin.math.abs(amount))
+            return "$sign $formattedAmount"
         }
     }
 }
