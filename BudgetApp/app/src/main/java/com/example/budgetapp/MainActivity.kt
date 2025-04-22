@@ -1,8 +1,11 @@
 package com.example.budgetapp
 
+import android.content.Intent
 import android.os.Bundle
+import android.util.Log
+import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.drawerlayout.widget.DrawerLayout
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
@@ -10,7 +13,9 @@ import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.example.budgetapp.databinding.ActivityMainBinding
-import com.google.android.material.navigation.NavigationView
+import com.example.budgetapp.ui.transactions.TransactionsListFragment
+import com.example.budgetapp.ui.addedit.AddTransactionActivity
+import kotlin.jvm.java
 
 class MainActivity : AppCompatActivity() {
 
@@ -34,32 +39,51 @@ class MainActivity : AppCompatActivity() {
             .findFragmentById(R.id.nav_host_fragment_container) as NavHostFragment
         navController = navHostFragment.navController
 
+        // Настройка DrawerLayout и NavigationView с NavController
         val drawerLayout = binding.drawerLayout
         val navView = binding.navView
 
-        // Определяем конфигурацию AppBar: связываем DrawerLayout и указываем top-level destinations
-        // Top-level destinations - это экраны, на которых кнопка "Назад" не будет отображаться как стрелка вверх,
-        // а будет открывать/закрывать Drawer. Обычно это основные экраны из меню.
         appBarConfiguration = AppBarConfiguration(
             setOf(
-                R.id.nav_overview, R.id.nav_transactions_list, R.id.nav_charts, R.id.nav_categories, R.id.nav_settings // ID из menu/activity_main_drawer.xml
+                R.id.nav_overview, R.id.nav_transactions_list, R.id.nav_charts, R.id.nav_categories, R.id.nav_settings
             ), drawerLayout
         )
 
-        // Связываем ActionBar (Toolbar) с NavController для автоматического обновления заголовка
-        // и отображения кнопки навигации (гамбургер/стрелка назад)
         setupActionBarWithNavController(navController, appBarConfiguration)
-
-        // Связываем NavigationView с NavController, чтобы переходы происходили при нажатии на пункты меню
         navView.setupWithNavController(navController)
 
-        // --- Дополнительно: Настройка FAB (Floating Action Button) ---
+        // --- Настройка FAB (Floating Action Button) ---
         binding.fabAddTransaction.setOnClickListener {
-            // TODO: Реализовать переход на экран добавления транзакции
-            // Например, можно использовать navController.navigate(R.id.action_global_to_addTransactionActivity)
-            // или запустить AddTransactionActivity через Intent
-            // Пока просто выведем сообщение:
-            android.widget.Toast.makeText(this, "Добавить транзакцию (пока не реализовано)", android.widget.Toast.LENGTH_SHORT).show()
+            val intent = Intent(this, AddTransactionActivity::class.java)
+            addTransactionLauncher.launch(intent)
+        }
+
+    }
+
+    private val addTransactionLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == AppCompatActivity.RESULT_OK) {
+            // Транзакция была добавлена/изменена, нужно обновить список
+            // Нам нужно как-то уведомить текущий видимый фрагмент (если это список транзакций)
+            // Это более сложная часть, есть несколько подходов:
+            // 1. Использовать общую ViewModel для MainActivity и фрагментов.
+            // 2. Использовать FragmentResultListener.
+            // 3. Просто заставить текущий фрагмент перезагрузить данные (менее элегантно).
+
+            // Пока простой вариант: попробуем найти TransactionsListFragment и вызвать его метод
+            val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment_container) as NavHostFragment
+            val currentFragment = navHostFragment.childFragmentManager.fragments.firstOrNull() // Получаем текущий видимый фрагмент
+
+            if (currentFragment is TransactionsListFragment) {
+                // Если текущий фрагмент - это список транзакций, вызываем его метод для обновления
+                // Нужно будет добавить такой метод в TransactionsListFragment
+                currentFragment.refreshTransactions()
+            }
+            // TODO: Рассмотреть обновление и для OverviewFragment, если он показывает данные
+
+            Log.d("MainActivity", "Returned from AddTransactionActivity with RESULT_OK")
+            Toast.makeText(this, "Список будет обновлен", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -77,4 +101,5 @@ class MainActivity : AppCompatActivity() {
             super.onBackPressed()
         }
     }
+
 }

@@ -3,8 +3,8 @@ package com.example.budgetapp
 import android.content.Context
 import android.content.SharedPreferences
 import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken // Важно для списков!
-import com.example.budgetapp.model.Transaction // Импортируйте ваш Transaction класс
+import com.google.gson.reflect.TypeToken
+import com.example.budgetapp.model.Transaction
 
 object SharedPreferencesManager {
 

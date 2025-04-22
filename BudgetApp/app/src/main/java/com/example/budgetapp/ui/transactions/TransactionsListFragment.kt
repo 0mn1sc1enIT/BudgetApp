@@ -1,6 +1,7 @@
 package com.example.budgetapp.ui.transactions
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -88,6 +89,10 @@ class TransactionsListFragment : Fragment() {
         }
     }
     // ------------------------------------------------
+    fun refreshTransactions() {
+        Log.d("TransactionsListFragment", "Refreshing transactions list...")
+        loadTransactions() // Просто перезагружаем данные из SharedPreferences
+    }
 
     override fun onDestroyView() {
         super.onDestroyView()
