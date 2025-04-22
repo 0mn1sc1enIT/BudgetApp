@@ -10,7 +10,12 @@
         android:name="com.example.budgetapp.ui.overview.OverviewFragment"
         android:label="Обзор"
         tools:layout="@layout/fragment_overview" />
+    <fragment
+        android:id="@+id/nav_transactions_list"
+        android:name="com.example.budgetapp.ui.transactions.TransactionsListFragment"
+        android:label="Все транзакции"
+        tools:layout="@layout/fragment_transactions_list" />
 
-    <!-- Пока остальные фрагменты не добавляем -->
+    <!-- TODO: Добавить остальные фрагменты (charts, categories, settings) -->
 
 </navigation>
