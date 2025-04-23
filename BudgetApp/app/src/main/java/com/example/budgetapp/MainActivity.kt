@@ -6,17 +6,22 @@ import android.util.Log
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.view.GravityCompat
 import androidx.core.view.WindowCompat
 import androidx.navigation.NavController
+import androidx.navigation.NavOptions // Импортируем NavOptions
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
+import androidx.navigation.ui.NavigationUI
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
-import androidx.navigation.ui.setupWithNavController
 import com.example.budgetapp.databinding.ActivityMainBinding
+import com.example.budgetapp.ui.categories.CategoriesActivity
+import com.example.budgetapp.ui.converter.CurrencyConverterActivity
 import com.example.budgetapp.ui.transactions.TransactionsListFragment
-import com.example.budgetapp.ui.addedit.AddTransactionActivity
-import kotlin.jvm.java
+import com.example.budgetapp.ui.overview.OverviewFragment
+import com.example.budgetapp.ui.settings.SettingsActivity
 
 class MainActivity : AppCompatActivity() {
 
@@ -24,84 +29,153 @@ class MainActivity : AppCompatActivity() {
     private lateinit var navController: NavController
     private lateinit var appBarConfiguration: AppBarConfiguration
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    // ВОЗВРАЩАЕМ companion object с ключом
+    companion object {
+        const val EXTRA_DESTINATION_ID = "com.example.budgetapp.DESTINATION_ID"
+    }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+
+        super.onCreate(savedInstanceState) // Теперь вызываем super.onCreate
+        // ... инициализация binding, SharedPreferences, Toolbar ...
         WindowCompat.setDecorFitsSystemWindows(window, true)
-        // Инициализируем ViewBinding
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Инициализируем SharedPreferencesManager (как и раньше)
-        SharedPreferencesManager.init(applicationContext)
-        //SharedPreferencesManager.clearAllData()
         setSupportActionBar(binding.toolbar)
+
 
         val navHostFragment = supportFragmentManager
             .findFragmentById(R.id.nav_host_fragment_container) as NavHostFragment
         navController = navHostFragment.navController
 
-        // Настройка DrawerLayout и NavigationView с NavController
         val drawerLayout = binding.drawerLayout
         val navView = binding.navView
 
         appBarConfiguration = AppBarConfiguration(
-            setOf(
-                R.id.nav_overview, R.id.nav_transactions_list, R.id.nav_charts, R.id.nav_categories, R.id.nav_settings
-            ), drawerLayout
+            setOf(R.id.nav_overview, R.id.nav_transactions_list, R.id.nav_charts),
+            drawerLayout
         )
 
         setupActionBarWithNavController(navController, appBarConfiguration)
-        navView.setupWithNavController(navController)
 
-        // --- Настройка FAB (Floating Action Button) ---
+        // Ручная настройка слушателя NavigationView
+        navView.setNavigationItemSelectedListener { menuItem ->
+            drawerLayout.closeDrawer(GravityCompat.START)
+            val handled = NavigationUI.onNavDestinationSelected(menuItem, navController)
+            if (!handled) {
+                when (menuItem.itemId) {
+                    R.id.nav_categories -> {
+                        val intent = Intent(this, CategoriesActivity::class.java)
+                        startActivity(intent)
+                        true
+                    }
+                    R.id.nav_settings -> {
+                        val intent = Intent(this, SettingsActivity::class.java)
+                        startActivity(intent)
+                        true
+                    }
+                    R.id.nav_converter -> {
+                        val intent = Intent(this, CurrencyConverterActivity::class.java)
+                        startActivity(intent)
+                        true
+                    }
+                    else -> false
+                }
+            } else {
+                true
+            }
+        }
+
+        // Установка слушателя изменения пункта назначения NavController'а
+        // ОСТАВЛЯЕМ ЕГО - он будет обновлять меню ПОСЛЕ навигации
+        navController.addOnDestinationChangedListener { _, destination, _ ->
+            Log.d("MainActivity", "Destination changed to: ${destination.label} (ID: ${destination.id})")
+            if (navView.menu.findItem(destination.id) != null) {
+                // Проверяем перед установкой, чтобы не вызвать лишний цикл обновлений
+                if (navView.checkedItem?.itemId != destination.id) {
+                    navView.setCheckedItem(destination.id)
+                    Log.d("MainActivity", "Set checked item in NavView to: ${destination.id}")
+                }
+            } else {
+                navView.checkedItem?.isChecked = false // Снимаем выделение, если пункта нет в меню
+                Log.d("MainActivity", "Destination ID ${destination.id} not found in NavView menu.")
+            }
+        }
+
+        // Обработчик FAB
         binding.fabAddTransaction.setOnClickListener {
-            val intent = Intent(this, AddTransactionActivity::class.java)
+            val intent = Intent(this, com.example.budgetapp.ui.addedit.AddTransactionActivity::class.java)
             addTransactionLauncher.launch(intent)
         }
 
+        // ВОЗВРАЩАЕМ обработку Intent при создании
+        handleIntent(intent)
     }
+
+    // ВОЗВРАЩАЕМ onNewIntent
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        handleIntent(intent) // Обрабатываем новый intent
+        setIntent(intent) // Устанавливаем новый intent как текущий
+    }
+
+    // УБИРАЕМ onResume (он больше не нужен для синхронизации)
+    // override fun onResume() { ... }
+
+    // ВОЗВРАЩАЕМ handleIntent
+    private fun handleIntent(intent: Intent) {
+        if (intent.hasExtra(EXTRA_DESTINATION_ID)) {
+            val destinationId = intent.getIntExtra(EXTRA_DESTINATION_ID, 0)
+            Log.d("MainActivity", "Handling Intent with destination ID: $destinationId")
+
+            if (destinationId != 0 && navController.graph.findNode(destinationId) != null) {
+                // Проверяем, не находимся ли мы уже там
+                if (navController.currentDestination?.id != destinationId) {
+                    val navOptions = NavOptions.Builder()
+                        .setLaunchSingleTop(true)
+                        .setPopUpTo(navController.graph.startDestinationId, false)
+                        .build()
+                    // ВЫПОЛНЯЕМ НАВИГАЦИЮ
+                    navController.navigate(destinationId, null, navOptions)
+                }
+                // Удаляем extra, чтобы не сработал снова
+                intent.removeExtra(EXTRA_DESTINATION_ID)
+            } else {
+                Log.w("MainActivity", "Invalid or missing destination ID in Intent: $destinationId.")
+            }
+        }
+    }
+
+    // Метод синхронизации УДАЛЯЕМ, так как listener делает эту работу
+    // private fun synchronizeNavViewSelection() { ... }
+
 
     private val addTransactionLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
         if (result.resultCode == AppCompatActivity.RESULT_OK) {
-            // Транзакция была добавлена/изменена, нужно обновить список
-            // Нам нужно как-то уведомить текущий видимый фрагмент (если это список транзакций)
-            // Это более сложная часть, есть несколько подходов:
-            // 1. Использовать общую ViewModel для MainActivity и фрагментов.
-            // 2. Использовать FragmentResultListener.
-            // 3. Просто заставить текущий фрагмент перезагрузить данные (менее элегантно).
-
-            // Пока простой вариант: попробуем найти TransactionsListFragment и вызвать его метод
-            val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment_container) as NavHostFragment
-            val currentFragment = navHostFragment.childFragmentManager.fragments.firstOrNull() // Получаем текущий видимый фрагмент
-
-            if (currentFragment is TransactionsListFragment) {
-                // Если текущий фрагмент - это список транзакций, вызываем его метод для обновления
-                // Нужно будет добавить такой метод в TransactionsListFragment
-                currentFragment.refreshTransactions()
-            }
-            // TODO: Рассмотреть обновление и для OverviewFragment, если он показывает данные
-
             Log.d("MainActivity", "Returned from AddTransactionActivity with RESULT_OK")
-            Toast.makeText(this, "Список будет обновлен", Toast.LENGTH_SHORT).show()
+            // Обновляем видимый фрагмент
+            val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment_container) as NavHostFragment
+            val currentFragment = navHostFragment.childFragmentManager.primaryNavigationFragment
+            when (currentFragment) {
+                is TransactionsListFragment -> currentFragment.refreshTransactions()
+                is OverviewFragment -> currentFragment.loadAndDisplayOverview() // Убедись, что метод доступен
+            }
         }
     }
 
-    // Этот метод необходим для обработки нажатия кнопки "Вверх" (стрелка назад или гамбургер) в ActionBar
     override fun onSupportNavigateUp(): Boolean {
         return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
     }
 
-    // TODO: Обработка нажатия системной кнопки "Назад", если Drawer открыт (необязательно, но улучшает UX)
-    @Deprecated("This method has been deprecated in favor of using the\n      {@link OnBackPressedDispatcher} via {@link #getOnBackPressedDispatcher()}.\n      The OnBackPressedDispatcher controls how back button events are dispatched\n      to one or more {@link OnBackPressedCallback} objects.")
+    @Deprecated("...")
     override fun onBackPressed() {
-        if (binding.drawerLayout.isDrawerOpen(androidx.core.view.GravityCompat.START)) {
-            binding.drawerLayout.closeDrawer(androidx.core.view.GravityCompat.START)
+        if (binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
+            binding.drawerLayout.closeDrawer(GravityCompat.START)
         } else {
             super.onBackPressed()
         }
     }
-
 }

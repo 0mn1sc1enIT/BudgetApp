@@ -1,7 +1,19 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
-    <style name="Base.Theme.BudgetApp" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your dark theme here. -->
-        <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
+    <!-- Базовая тема приложения для НОЧИ -->
+    <!-- Просто наследуемся или переопределяем Material атрибуты -->
+    <style name="Theme.BudgetApp" parent="Base.Theme.BudgetApp">
+        <!-- DayNight тема сама подхватит цвета из values-night/colors.xml -->
+        <!-- Можно переопределить, если нужно -->
+        <!-- <item name="colorSurface">@color/surface_dark</item> -->
+        <!-- <item name="colorOnSurface">@color/on_surface_dark</item> -->
+        <!-- <item name="android:windowBackground">@color/background_dark</item> -->
+
+        <!-- Для темной темы часто полезно указать, что иконки статус бара должны быть светлыми -->
+        <item name="android:windowLightStatusBar" >false</item>
     </style>
+
+    <!-- Стили для AppBar (если используешь AppCompat Toolbar) -->
+    <style name="Theme.BudgetApp.AppBarOverlay" parent="ThemeOverlay.Material3.Dark.ActionBar" />
+    <style name="Theme.BudgetApp.PopupOverlay" parent="ThemeOverlay.Material3.Dark" /> <!-- Для темной темы -->
+
 </resources>

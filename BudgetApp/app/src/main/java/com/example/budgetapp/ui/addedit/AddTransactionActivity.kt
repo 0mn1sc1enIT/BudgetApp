@@ -1,45 +1,86 @@
 package com.example.budgetapp.ui.addedit
 
+import android.app.Activity
 import android.os.Bundle
-
+import android.util.Log
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.example.budgetapp.R
-import com.example.budgetapp.databinding.ActivityAddTransactionBinding
 import androidx.core.view.WindowCompat
+import com.example.budgetapp.R
+import com.example.budgetapp.SharedPreferencesManager
+import com.example.budgetapp.databinding.ActivityAddTransactionBinding
+import com.example.budgetapp.model.Transaction // Убедись, что импорт Transaction есть
 
 class AddTransactionActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityAddTransactionBinding
-    private lateinit var formFragment: AddTransactionFormFragment // Ссылка на фрагмент
+    // Убираем прямое хранение ссылки на фрагмент здесь
+    // private lateinit var formFragment: AddTransactionFormFragment
+
+    companion object {
+        // Ключ для передачи ID транзакции на редактирование
+        const val EXTRA_TRANSACTION_ID = "com.example.budgetapp.TRANSACTION_ID"
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
+        super.onCreate(savedInstanceState) // super.onCreate() вызывается первым
         WindowCompat.setDecorFitsSystemWindows(window, true)
-
         binding = ActivityAddTransactionBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Настройка Toolbar
         setSupportActionBar(binding.toolbarAddTransaction)
-        supportActionBar?.setDisplayHomeAsUpEnabled(true) // Показать кнопку "назад" (стрелка)
-        supportActionBar?.title = "Добавить транзакцию" // Устанавливаем заголовок
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        // Добавляем фрагмент формы, если он еще не добавлен (при повороте экрана и т.д.)
-        if (savedInstanceState == null) {
-            formFragment = AddTransactionFormFragment() // Создаем экземпляр
-            supportFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container_add_transaction, formFragment)
-                .commitNow() // Используем commitNow для синхронного добавления
+        // Получаем ID транзакции из Intent, если он есть
+        val transactionIdToEdit = intent.getStringExtra(EXTRA_TRANSACTION_ID)
+        var isEditMode = false // Флаг режима
+
+        if (transactionIdToEdit != null) {
+            // Проверяем, существует ли транзакция (на всякий случай)
+            val transactionExists = SharedPreferencesManager.loadTransactions()
+                .any { it.id == transactionIdToEdit }
+            if (transactionExists) {
+                // Режим редактирования
+                isEditMode = true
+                Log.d("AddTransactionActivity", "Edit mode, transaction ID: $transactionIdToEdit")
+                supportActionBar?.title = "Редактировать транзакцию" // Меняем заголовок
+            } else {
+                // Ошибка - транзакция не найдена
+                Log.e("AddTransactionActivity", "Transaction with ID $transactionIdToEdit not found in storage!")
+                Toast.makeText(this, "Ошибка: Транзакция не найдена", Toast.LENGTH_LONG).show()
+                setResult(Activity.RESULT_CANCELED) // Устанавливаем результат отмены
+                finish() // Закрываем Activity
+                return // Прерываем onCreate
+            }
         } else {
-            // Восстанавливаем ссылку на фрагмент после пересоздания Activity
-            formFragment = supportFragmentManager.findFragmentById(R.id.fragment_container_add_transaction) as AddTransactionFormFragment
+            // Режим добавления
+            Log.d("AddTransactionActivity", "Add mode")
+            supportActionBar?.title = "Добавить транзакцию"
         }
+
+        // Добавляем фрагмент формы, если он еще не добавлен
+        // Передаем ID транзакции (или null) в аргументы фрагмента
+        if (savedInstanceState == null) {
+            val fragmentToShow = AddTransactionFormFragment.newInstance(transactionIdToEdit)
+            supportFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container_add_transaction, fragmentToShow)
+                .commitNow() // Используем commitNow для синхронности, если нужно сразу работать с фрагментом
+        }
+        // Если savedInstanceState != null, система сама восстановит фрагмент с его аргументами
     }
 
     // Обработка нажатия кнопки "назад" в Toolbar
     override fun onSupportNavigateUp(): Boolean {
-        finish() // Просто закрываем Activity
+        // Устанавливаем результат CANCELLED, если пользователь ушел кнопкой назад
+        setResult(Activity.RESULT_CANCELED)
+        finish()
         return true
+    }
+
+    // Обработка системной кнопки "назад"
+    @Deprecated("This method has been deprecated in favor of using the OnBackPressedDispatcher")
+    override fun onBackPressed() {
+        setResult(Activity.RESULT_CANCELED)
+        super.onBackPressed()
     }
 }

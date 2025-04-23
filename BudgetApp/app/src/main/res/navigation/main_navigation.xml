@@ -16,6 +16,14 @@
         android:label="Все транзакции"
         tools:layout="@layout/fragment_transactions_list" />
 
-    <!-- TODO: Добавить остальные фрагменты (charts, categories, settings) -->
+    <!-- Добавляем ChartsFragment -->
+    <fragment
+        android:id="@+id/nav_charts"
+        android:name="com.example.budgetapp.ui.charts.ChartsFragment"
+        android:label="Статистика"
+        tools:layout="@layout/fragment_charts" />
+
+    <!-- TODO: Добавить остальные фрагменты (settings?) -->
+    <!-- Пункт categories ведет к Activity, поэтому здесь не нужен -->
 
 </navigation>

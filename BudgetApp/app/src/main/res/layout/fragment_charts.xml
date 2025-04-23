@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="?android:attr/colorBackground"
+    tools:context=".ui.charts.ChartsFragment">
+
+    <!-- Выбор периода -->
+<com.google.android.material.textfield.TextInputLayout
+android:id="@+id/input_layout_period_spinner"
+style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+android:layout_width="match_parent"
+android:layout_height="wrap_content"
+android:layout_marginStart="16dp"
+android:layout_marginTop="8dp"
+android:layout_marginEnd="16dp"
+android:hint="Период">
+<!-- Стиль управляет цветами -->
+<AutoCompleteTextView
+    android:id="@+id/spinner_period_selector"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:inputType="none"
+    android:textColor="?android:attr/textColorPrimary"
+tools:ignore="LabelFor" />
+
+</com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Табы для переключения типов графиков -->
+<com.google.android.material.tabs.TabLayout
+android:id="@+id/tab_layout_charts"
+android:layout_width="match_parent"
+android:layout_height="wrap_content"
+android:background="?attr/colorSurface"
+    app:tabTextColor="?android:attr/textColorSecondary"
+    app:tabSelectedTextColor="?attr/colorPrimary"
+    app:tabIndicatorColor="?attr/colorPrimary"
+    app:tabMode="fixed"
+    app:tabGravity="fill"/>
+
+    <!-- Контейнер для фрагментов с графиками -->
+<androidx.viewpager2.widget.ViewPager2
+android:id="@+id/view_pager_charts"
+android:layout_width="match_parent"
+android:layout_height="0dp"
+android:layout_weight="1" />
+
+    </LinearLayout>

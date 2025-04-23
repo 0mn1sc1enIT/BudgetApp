@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">BudgetApp</string>
+    <string name="income">Доход</string>
+    <string name="expense">Расход</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="income_categories_header">Доходы</string>
+    <string name="expense_categories_header">Расходы</string>
 </resources>

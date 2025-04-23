@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp">
+    <!-- Фон LinearLayout управляется темой диалога -->
+
+    <!-- Название категории -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/input_layout_category_name"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Название категории">
+        <!-- Цвета этого компонента управляются стилем и темой -->
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/edit_text_category_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textCapSentences"
+            android:textColor="?android:attr/textColorPrimary" /> <!-- Добавлено для явности -->
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Тип категории -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Тип категории:"
+        android:textAppearance="?attr/textAppearanceTitleMedium"
+    android:textColor="?android:attr/textColorPrimary" />
+
+    <RadioGroup
+        android:id="@+id/radio_group_category_type"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="8dp">
+
+        <RadioButton
+            android:id="@+id/radio_category_expense"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="@string/expense"
+            android:textColor="?android:attr/textColorPrimary"
+        android:checked="true"/>
+
+        <RadioButton
+            android:id="@+id/radio_category_income"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:textColor="?android:attr/textColorPrimary"
+        android:text="@string/income" />
+    </RadioGroup>
+
+    <!-- Кнопки -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="24dp"
+        android:gravity="end">
+        <!-- Стили кнопок должны подхватывать тему -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/button_cancel_category"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Отмена"
+            android:layout_marginEnd="8dp"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/button_save_category"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Сохранить" />
+    </LinearLayout>
+
+</LinearLayout>

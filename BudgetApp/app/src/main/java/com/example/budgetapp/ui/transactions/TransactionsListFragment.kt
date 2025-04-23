@@ -1,16 +1,20 @@
 package com.example.budgetapp.ui.transactions
 
+import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.budgetapp.SharedPreferencesManager
 import com.example.budgetapp.databinding.FragmentTransactionsListBinding
 import com.example.budgetapp.model.Transaction
 import com.example.budgetapp.model.TransactionType
+import com.example.budgetapp.ui.addedit.AddTransactionActivity
 import java.util.* // Для Date()
 
 class TransactionsListFragment : Fragment() {
@@ -19,6 +23,16 @@ class TransactionsListFragment : Fragment() {
     private val binding get() = _binding!!
 
     private lateinit var transactionAdapter: TransactionAdapter
+
+    private val transactionResultLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            // Если транзакция была добавлена ИЛИ изменена, обновляем список
+            Log.d("TransactionsListFragment", "Received RESULT_OK from AddTransactionActivity, refreshing list.")
+            refreshTransactions() // Вызываем наш метод обновления
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -41,7 +55,11 @@ class TransactionsListFragment : Fragment() {
 
     private fun setupRecyclerView() {
         // Создаем адаптер с пустым списком и передаем контекст
-        transactionAdapter = TransactionAdapter(listOf(), requireContext())
+        transactionAdapter = TransactionAdapter(listOf(), requireContext()) { transaction ->
+            // Код, который выполнится при клике на элемент списка
+            Log.d("TransactionsListFragment", "Clicked on transaction: ${transaction.id}")
+            launchEditTransactionActivity(transaction.id) // Вызываем метод для запуска редактирования
+        }
 
         binding.recyclerViewTransactions.apply {
             // Устанавливаем LayoutManager (как будут располагаться элементы - линейно)
@@ -49,6 +67,14 @@ class TransactionsListFragment : Fragment() {
             // Устанавливаем адаптер
             adapter = transactionAdapter
         }
+    }
+
+    private fun launchEditTransactionActivity(transactionId: String) {
+        val intent = Intent(requireContext(), AddTransactionActivity::class.java)
+        // Передаем ID транзакции как extra
+        intent.putExtra(AddTransactionActivity.EXTRA_TRANSACTION_ID, transactionId)
+        // Запускаем Activity и ждем результат
+        transactionResultLauncher.launch(intent)
     }
 
     private fun loadTransactions() {

@@ -21,7 +21,7 @@ class OverviewFragment : Fragment() {
     private val binding get() = _binding!!
 
     // Форматтер валюты
-    private val currencyFormatter: NumberFormat = NumberFormat.getCurrencyInstance(Locale("ru", "RU")) // Используем русский формат
+    private fun getFormatter(): NumberFormat = SharedPreferencesManager.getCurrencyFormatter()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -45,22 +45,18 @@ class OverviewFragment : Fragment() {
         loadAndDisplayOverview()
     }
 
-    private fun loadAndDisplayOverview() {
-        // 1. Загружаем все транзакции
+    internal fun loadAndDisplayOverview() {
         val transactions = SharedPreferencesManager.loadTransactions()
+        val formatter = getFormatter() // Получаем актуальный форматтер
 
-        // 2. Считаем общий баланс
         val totalBalance = calculateTotalBalance(transactions)
-        binding.textBalanceAmount.text = currencyFormatter.format(totalBalance)
-        // Устанавливаем цвет баланса
+        binding.textBalanceAmount.text = formatter.format(totalBalance) // Используем его
         val balanceColorRes = if (totalBalance >= 0) R.color.income_color else R.color.expense_color
         binding.textBalanceAmount.setTextColor(ContextCompat.getColor(requireContext(), balanceColorRes))
 
-
-        // 3. Считаем доходы и расходы за текущий месяц
         val (monthlyIncome, monthlyExpense) = calculateMonthlySummary(transactions)
-        binding.textMonthlyIncome.text = currencyFormatter.format(monthlyIncome)
-        binding.textMonthlyExpenses.text = currencyFormatter.format(monthlyExpense)
+        binding.textMonthlyIncome.text = formatter.format(monthlyIncome) // Используем его
+        binding.textMonthlyExpenses.text = formatter.format(monthlyExpense) // Используем его
 
         // TODO: Позже можно добавить график или более детальную информацию
     }

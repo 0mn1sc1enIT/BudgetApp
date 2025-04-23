@@ -17,13 +17,14 @@ import java.util.Locale
 
 class TransactionAdapter(
     private var transactions: List<Transaction>,
-    private val context: Context // Контекст нужен для доступа к ресурсам (цвета, строки)
+    private val context: Context,
+    private val onItemClick: (Transaction) -> Unit
 ) : RecyclerView.Adapter<TransactionAdapter.TransactionViewHolder>() {
 
     // Форматтер для даты
     private val dateFormat = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
 
-    private val currencyFormatter: NumberFormat = NumberFormat.getCurrencyInstance(Locale("ru", "RU"))
+    private fun getFormatter(): NumberFormat = SharedPreferencesManager.getCurrencyFormatter()
 
     // Кэш для загруженных категорий, чтобы не дергать SharedPreferences для каждого элемента
     private var categoriesMap: Map<String, Category> = mapOf()
@@ -40,14 +41,14 @@ class TransactionAdapter(
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TransactionViewHolder {
         // Используем ViewBinding для inflate макета элемента
         val binding = ItemTransactionBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        return TransactionViewHolder(binding)
+        return TransactionViewHolder(binding, onItemClick)
     }
 
     override fun onBindViewHolder(holder: TransactionViewHolder, position: Int) {
         val transaction = transactions[position]
         // Получаем категорию из кэша
         val category = categoriesMap[transaction.categoryId]
-        holder.bind(transaction, category) // Передаем и транзакцию, и категорию
+        holder.bind(transaction, category, SharedPreferencesManager.getCurrencyFormatter())
     }
 
     override fun getItemCount(): Int = transactions.size
@@ -59,13 +60,19 @@ class TransactionAdapter(
         notifyDataSetChanged()
     }
 
-    inner class TransactionViewHolder(private val binding: ItemTransactionBinding) : RecyclerView.ViewHolder(binding.root) {
+    inner class TransactionViewHolder(
+        private val binding: ItemTransactionBinding,
+        private val onItemClick: (Transaction) -> Unit
+    ) : RecyclerView.ViewHolder(binding.root) {
+
+        private lateinit var currentTransaction: Transaction
 
         // Теперь bind принимает и категорию
-        fun bind(transaction: Transaction, category: Category?) {
+        fun bind(transaction: Transaction, category: Category?, formatter: NumberFormat) {
+            currentTransaction = transaction
             // Отображаем имя категории или "Категория не найдена", если что-то пошло не так
             binding.textTransactionCategory.text = category?.name ?: "Категория?"
-            binding.textTransactionAmount.text = formatAmount(transaction.amount, transaction.type) // Передаем тип для знака +/-
+            binding.textTransactionAmount.text = formatAmount(transaction.amount, transaction.type, formatter) // Передаем тип для знака +/-
 
             binding.textTransactionDetail.text = if (!transaction.description.isNullOrBlank()) {
                 transaction.description
@@ -83,14 +90,15 @@ class TransactionAdapter(
                     binding.textTransactionAmount.setTextColor(ContextCompat.getColor(context, R.color.expense_color))
                 }
             }
-            // TODO: Добавить обработчик клика
+            binding.root.setOnClickListener {
+                onItemClick(currentTransaction) // Вызываем лямбду при клике
+            }
         }
 
         // Обновляем formatAmount для добавления знака +/-
-        private fun formatAmount(amount: Double, type: TransactionType): String {
+        private fun formatAmount(amount: Double, type: TransactionType, formatter: NumberFormat): String {
             val sign = if (type == TransactionType.EXPENSE) "-" else "+"
-            // Используем Math.abs чтобы сумма всегда была положительной, знак добавляем сами
-            val formattedAmount = currencyFormatter.format(kotlin.math.abs(amount))
+            val formattedAmount = formatter.format(kotlin.math.abs(amount)) // Используем переданный форматтер
             return "$sign $formattedAmount"
         }
     }

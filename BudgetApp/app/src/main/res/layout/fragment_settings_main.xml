@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="?android:attr/colorBackground"
+    tools:context=".ui.settings.SettingsMainFragment">
+
+    <!-- Выбор валюты -->
+<TextView
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:text="Символ валюты"
+android:textAppearance="?attr/textAppearanceTitleMedium"
+    android:textColor="?android:attr/textColorPrimary" />
+
+<Spinner
+android:id="@+id/spinner_currency_symbol"
+android:layout_width="match_parent"
+android:layout_height="wrap_content"
+android:layout_marginTop="8dp"
+android:minHeight="48dp"
+style="@style/Widget.AppCompat.Spinner.Underlined"
+android:backgroundTint="?attr/colorControlNormal"
+    tools:listitem="@android:layout/simple_spinner_item"/>
+
+
+<androidx.constraintlayout.widget.ConstraintLayout
+android:id="@+id/setting_theme"
+android:layout_width="match_parent"
+android:layout_height="wrap_content"
+android:minHeight="?android:attr/listPreferredItemHeightSmall"
+android:layout_marginTop="16dp"
+    android:paddingTop="8dp"
+    android:paddingBottom="8dp">
+
+<ImageView
+android:id="@+id/icon_theme"
+android:layout_width="24dp"
+android:layout_height="24dp"
+android:layout_marginStart="8dp"
+app:srcCompat="@drawable/ic_settings_theme"
+app:tint="?attr/colorControlNormal"
+app:layout_constraintTop_toTopOf="@+id/title_theme"
+app:layout_constraintBottom_toBottomOf="@+id/title_theme"
+app:layout_constraintStart_toStartOf="parent"
+android:contentDescription="Тема" />
+
+<TextView
+android:id="@+id/title_theme"
+android:textAppearance="?attr/textAppearanceBodyLarge"
+    android:textColor="?android:attr/textColorPrimary"
+    android:layout_width="0dp"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="16dp"
+    android:layout_marginEnd="8dp"
+    android:text="Тема приложения"
+    app:layout_constraintTop_toTopOf="parent"
+    app:layout_constraintStart_toEndOf="@id/icon_theme"
+    app:layout_constraintEnd_toEndOf="parent"/>
+
+<RadioGroup
+android:id="@+id/radio_group_theme"
+android:layout_width="0dp"
+android:layout_height="wrap_content"
+android:layout_marginTop="8dp"
+android:orientation="vertical"
+app:layout_constraintTop_toBottomOf="@id/title_theme"
+app:layout_constraintStart_toStartOf="@id/title_theme"
+app:layout_constraintEnd_toEndOf="parent">
+
+<RadioButton
+    android:id="@+id/radio_theme_light"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:textColor="?android:attr/textColorPrimary"
+    android:minHeight="48dp"
+    android:text="Светлая" />
+<RadioButton
+    android:id="@+id/radio_theme_dark"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:textColor="?android:attr/textColorPrimary"
+    android:minHeight="48dp"
+    android:text="Темная" />
+
+</RadioGroup>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- Разделитель -->
+<View
+android:layout_width="match_parent"
+android:layout_height="1dp"
+android:layout_marginTop="24dp"
+android:layout_marginBottom="24dp"
+android:background="?android:attr/listDivider"/>
+
+    <!-- Управление данными -->
+<TextView
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:text="Управление данными"
+android:textAppearance="?attr/textAppearanceTitleMedium"
+    android:textColor="?android:attr/textColorPrimary" />
+
+
+<androidx.constraintlayout.widget.ConstraintLayout
+android:id="@+id/button_manage_data"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:clickable="true"
+    android:focusable="true"
+    android:background="?attr/selectableItemBackground"
+    android:minHeight="?android:attr/listPreferredItemHeightSmall"
+    android:layout_marginTop="8dp"
+    android:paddingStart="8dp"
+    android:paddingEnd="8dp"
+    android:paddingTop="8dp"
+    android:paddingBottom="8dp">
+
+<ImageView
+android:id="@+id/icon_data"
+android:layout_width="24dp"
+android:layout_height="24dp"
+app:tint="?attr/colorControlNormal"
+app:layout_constraintTop_toTopOf="parent"
+app:layout_constraintBottom_toBottomOf="parent"
+app:layout_constraintStart_toStartOf="parent"
+android:contentDescription="Очистка данных" />
+
+<TextView
+android:id="@+id/title_data"
+android:textAppearance="?attr/textAppearanceBodyLarge"
+android:textColor="?android:attr/textColorPrimary"
+android:layout_width="0dp"
+android:layout_height="wrap_content"
+android:layout_marginStart="16dp"
+android:layout_marginEnd="8dp"
+android:text="Очистка данных"
+app:layout_constraintTop_toTopOf="parent"
+app:layout_constraintBottom_toBottomOf="parent"
+app:layout_constraintStart_toEndOf="@id/icon_data"
+app:layout_constraintEnd_toStartOf="@+id/arrow_data"/>
+
+<ImageView
+android:id="@+id/arrow_data"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+app:tint="?attr/colorControlNormal"
+app:layout_constraintTop_toTopOf="parent"
+app:layout_constraintBottom_toBottomOf="parent"
+app:layout_constraintEnd_toEndOf="parent"
+android:importantForAccessibility="no" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </LinearLayout>

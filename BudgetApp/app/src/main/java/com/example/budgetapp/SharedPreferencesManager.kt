@@ -3,17 +3,23 @@ package com.example.budgetapp
 import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
+import androidx.appcompat.app.AppCompatDelegate
 import com.example.budgetapp.model.Category
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.example.budgetapp.model.Transaction
 import com.example.budgetapp.model.TransactionType
+import java.text.NumberFormat
+import java.util.Currency
+import java.util.Locale
 
 object SharedPreferencesManager {
 
     private const val PREFS_NAME = "MyBudgetPrefs" // Имя файла SharedPreferences
     private const val KEY_TRANSACTIONS = "transactions_list" // Ключ для хранения списка транзакций
     private const val KEY_CATEGORIES = "categories_list"
+    private const val KEY_CURRENCY_SYMBOL = "currency_symbol"
+    private const val DEFAULT_CURRENCY_SYMBOL = "₸"
 
     private lateinit var sharedPreferences: SharedPreferences
     private val gson = Gson() // Создаем экземпляр Gson для сериализации/десериализации
@@ -163,5 +169,62 @@ object SharedPreferencesManager {
     fun clearAllData() {
         checkInitialized()
         sharedPreferences.edit().clear().apply() // Очищает ВСЕ данные в этом файле SharedPreferences
+    }
+
+    // Метод для сохранения символа валюты
+    fun saveCurrencySymbol(symbol: String) {
+        checkInitialized()
+        sharedPreferences.edit().putString(KEY_CURRENCY_SYMBOL, symbol).apply()
+    }
+
+    // Метод для загрузки символа валюты
+    fun getCurrencySymbol(): String {
+        checkInitialized()
+        // Возвращаем сохраненный символ или дефолтный, если не сохранен
+        return sharedPreferences.getString(KEY_CURRENCY_SYMBOL, DEFAULT_CURRENCY_SYMBOL) ?: DEFAULT_CURRENCY_SYMBOL
+    }
+
+    private const val KEY_DARK_MODE_ENABLED = "dark_mode_enabled"
+
+    // Новый метод для сохранения настройки темы (boolean)
+    fun saveDarkModeEnabled(isDarkMode: Boolean) {
+        checkInitialized()
+        sharedPreferences.edit().putBoolean(KEY_DARK_MODE_ENABLED, isDarkMode).apply()
+    }
+
+    // Новый метод для загрузки настройки темы (boolean)
+    fun isDarkModeEnabled(): Boolean {
+        checkInitialized()
+        // Возвращаем сохраненное значение, по умолчанию false (светлая тема)
+        return sharedPreferences.getBoolean(KEY_DARK_MODE_ENABLED, false)
+    }
+
+    fun getCurrencyFormatter(): NumberFormat {
+        checkInitialized()
+        val savedSymbol = getCurrencySymbol() // Получаем сохраненный символ
+
+        // Создаем форматтер для русской локали (основа)
+        val formatter = NumberFormat.getCurrencyInstance(Locale("ru", "RU"))
+
+        // Пытаемся установить символ валюты
+        try {
+            // NumberFormat использует java.util.Currency. Нам нужно создать
+            // фиктивный объект Currency с нужным символом.
+            // Это может не всегда работать идеально для всех символов/локалей,
+            // но для основных (₽, $, €) должно быть нормально.
+            val currency = Currency.getInstance(Locale.getDefault()) // Берем текущую локаль для кода
+            val decimalFormatSymbols = (formatter as? java.text.DecimalFormat)?.decimalFormatSymbols ?: java.text.DecimalFormatSymbols.getInstance()
+            decimalFormatSymbols.currencySymbol = savedSymbol // Устанавливаем наш символ
+            (formatter as? java.text.DecimalFormat)?.decimalFormatSymbols = decimalFormatSymbols
+
+        } catch (e: Exception) {
+            // Если что-то пошло не так с Currency или форматированием,
+            // логируем ошибку и возвращаем стандартный форматтер
+            Log.e("SharedPreferencesManager", "Failed to set custom currency symbol '$savedSymbol'", e)
+            // Вернем стандартный форматтер для RU в этом случае
+            return NumberFormat.getCurrencyInstance(Locale("ru", "RU"))
+        }
+
+        return formatter
     }
 }

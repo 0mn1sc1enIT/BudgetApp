@@ -5,114 +5,116 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="16dp"
+    android:background="?android:attr/colorBackground"
     tools:context=".ui.overview.OverviewFragment">
 
-    <!-- Общий баланс -->
     <TextView
-        android:id="@+id/text_balance_label"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Текущий баланс:"
-        android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+    android:id="@+id/text_balance_label"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="Текущий баланс:"
+    android:textAppearance="?attr/textAppearanceHeadline6"
+    android:textColor="?android:attr/textColorPrimary"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/text_balance_amount"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:gravity="end"
-        android:textAppearance="@style/TextAppearance.MaterialComponents.Headline5"
-        android:textStyle="bold"
-        app:layout_constraintBaseline_toBaselineOf="@id/text_balance_label"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/text_balance_label"
-        tools:text="50 000,00 ₽"
-        tools:textColor="@color/income_color"/>
+    android:id="@+id/text_balance_amount"
+    android:layout_width="0dp"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="8dp"
+    android:gravity="end"
+    android:textAppearance="?attr/textAppearanceHeadline5"
+    android:textStyle="bold"
+    app:layout_constraintBaseline_toBaselineOf="@id/text_balance_label"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toEndOf="@id/text_balance_label"
+    tools:text="50 000,00 ₽" />
 
-    <!-- Разделитель -->
     <View
-        android:id="@+id/divider"
-        android:layout_width="0dp"
-        android:layout_height="1dp"
-        android:layout_marginTop="24dp"
-        android:background="?android:attr/listDivider"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/text_balance_amount" />
+    android:id="@+id/divider"
+    android:layout_width="0dp"
+    android:layout_height="1dp"
+    android:layout_marginTop="24dp"
+    android:background="?android:attr/listDivider"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@id/text_balance_amount" />
 
-    <!-- Сводка за месяц -->
-    <TextView
-        android:id="@+id/text_monthly_summary_label"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        android:text="Сводка за текущий месяц:"
-        android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/divider" />
-
-    <!-- Доходы за месяц -->
-    <TextView
-        android:id="@+id/text_monthly_income_label"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="Доходы:"
-        android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/text_monthly_summary_label" />
 
     <TextView
-        android:id="@+id/text_monthly_income"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:gravity="end"
-        android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
-        android:textColor="@color/income_color"
-        android:textStyle="bold"
-        app:layout_constraintBaseline_toBaselineOf="@id/text_monthly_income_label"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/text_monthly_income_label"
-        android:layout_marginStart="8dp"
-        tools:text="60 000,00 ₽" />
+    android:id="@+id/text_monthly_summary_label"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="24dp"
+    android:text="Сводка за текущий месяц:"
+    android:textAppearance="?attr/textAppearanceSubtitle1"
+    android:textColor="?android:attr/textColorPrimary"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@id/divider" />
 
-    <!-- Расходы за месяц -->
-    <TextView
-        android:id="@+id/text_monthly_expenses_label"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="Расходы:"
-        android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/text_monthly_income_label" />
 
     <TextView
-        android:id="@+id/text_monthly_expenses"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:gravity="end"
-        android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
-        android:textColor="@color/expense_color"
-        android:textStyle="bold"
-        app:layout_constraintBaseline_toBaselineOf="@id/text_monthly_expenses_label"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/text_monthly_expenses_label"
-        android:layout_marginStart="8dp"
-        tools:text="3 500,00 ₽" />
+    android:id="@+id/text_monthly_income_label"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="16dp"
+    android:text="Доходы:"
+    android:textAppearance="?attr/textAppearanceBody1"
+    android:textColor="?android:attr/textColorPrimary"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@id/text_monthly_summary_label" />
 
-    <!-- Сюда позже можно добавить график -->
     <TextView
-        android:id="@+id/text_chart_placeholder"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="[Здесь будет график]"
-        android:layout_marginTop="32dp"
-        app:layout_constraintTop_toBottomOf="@id/text_monthly_expenses_label"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+    android:id="@+id/text_monthly_income"
+    android:layout_width="0dp"
+    android:layout_height="wrap_content"
+    android:gravity="end"
+    android:textAppearance="?attr/textAppearanceBody1"
+    android:textColor="@color/income_color"
+    android:textStyle="bold"
+    app:layout_constraintBaseline_toBaselineOf="@id/text_monthly_income_label"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toEndOf="@id/text_monthly_income_label"
+    android:layout_marginStart="8dp"
+    tools:text="60 000,00 ₽" />
 
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+<TextView
+android:id="@+id/text_monthly_expenses_label"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:layout_marginTop="8dp"
+android:text="Расходы:"
+android:textAppearance="?attr/textAppearanceBody1"
+android:textColor="?android:attr/textColorPrimary"
+app:layout_constraintStart_toStartOf="parent"
+app:layout_constraintTop_toBottomOf="@id/text_monthly_income_label" />
+
+<TextView
+android:id="@+id/text_monthly_expenses"
+android:layout_width="0dp"
+android:layout_height="wrap_content"
+android:gravity="end"
+android:textAppearance="?attr/textAppearanceBody1"
+android:textColor="@color/expense_color"
+    android:textStyle="bold"
+    app:layout_constraintBaseline_toBaselineOf="@id/text_monthly_expenses_label"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toEndOf="@id/text_monthly_expenses_label"
+    android:layout_marginStart="8dp"
+    tools:text="3 500,00 ₽" />
+
+<TextView
+android:id="@+id/text_chart_placeholder"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:text="[Здесь будет график]"
+android:textColor="?android:attr/textColorSecondary"
+android:layout_marginTop="32dp"
+app:layout_constraintTop_toBottomOf="@id/text_monthly_expenses_label"
+app:layout_constraintStart_toStartOf="parent"
+app:layout_constraintEnd_toEndOf="parent"/>
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?android:attr/colorBackground"
+    tools:context=".ui.categories.CategoryListFragment">
+
+<androidx.recyclerview.widget.RecyclerView
+android:id="@+id/recycler_view_categories"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+android:clipToPadding="false"
+android:paddingBottom="80dp"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:listitem="@layout/item_category" />
+
+    <!-- Текст, который будет показан, если список пуст -->
+<TextView
+android:id="@+id/text_empty_categories"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:text="Список категорий пуст"
+android:textAppearance="?attr/textAppearanceSubtitle1"
+android:textColor="?android:attr/textColorPrimary"
+    android:visibility="gone"
+    android:layout_gravity="center"
+    tools:visibility="visible"/>
+
+
+<com.google.android.material.floatingactionbutton.FloatingActionButton
+android:id="@+id/fab_add_category"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:layout_gravity="bottom|end"
+android:layout_margin="16dp"
+app:srcCompat="@drawable/ic_add"
+app:backgroundTint="?attr/colorPrimary"
+    app:tint="?attr/colorOnPrimary"
+    android:contentDescription="Добавить категорию" />
+
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>

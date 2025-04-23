@@ -1,7 +1,9 @@
 package com.example.budgetapp.ui.addedit
 
+import android.app.Activity
 import android.app.DatePickerDialog
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,13 +20,13 @@ import com.example.budgetapp.model.Transaction
 import com.example.budgetapp.model.TransactionType
 import java.text.SimpleDateFormat
 import java.util.*
+import java.util.concurrent.TimeUnit // Для работы с датой, если понадобится
 
 class AddTransactionFormFragment : Fragment() {
 
     private var _binding: FragmentAddTransactionFormBinding? = null
     private val binding get() = _binding!!
 
-    // Переменная для хранения выбранной даты
     private val calendar: Calendar = Calendar.getInstance()
     private val dateFormat = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
 
@@ -32,6 +34,34 @@ class AddTransactionFormFragment : Fragment() {
     private lateinit var categoryAdapter: ArrayAdapter<String>
 
     private var selectedCategory: Category? = null
+
+    // Переменные для режима редактирования
+    private var transactionIdToEdit: String? = null
+    private var transactionToEdit: Transaction? = null // Храним загруженную транзакцию
+
+    // --- Companion object и newInstance для передачи аргументов ---
+    companion object {
+        private const val ARG_TRANSACTION_ID = "transaction_id"
+
+        fun newInstance(transactionId: String?): AddTransactionFormFragment {
+            val fragment = AddTransactionFormFragment()
+            val args = Bundle().apply {
+                putString(ARG_TRANSACTION_ID, transactionId) // Помещаем ID в аргументы
+            }
+            fragment.arguments = args
+            return fragment
+        }
+    }
+    // ------------------------------------------------------------
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        // Получаем ID из аргументов при создании фрагмента
+        arguments?.let {
+            transactionIdToEdit = it.getString(ARG_TRANSACTION_ID)
+        }
+        Log.d("AddTransactionForm", "onCreate - Received transaction ID: $transactionIdToEdit")
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -43,28 +73,90 @@ class AddTransactionFormFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        Log.d("AddTransactionForm", "onViewCreated - Transaction ID: $transactionIdToEdit")
+
         setupDatePicker()
-        updateDateInView()
         setupCategorySpinner()
-        setupTransactionTypeListener() // Слушатель для RadioGroup
-        loadCategoriesForType(TransactionType.EXPENSE)
+        setupTransactionTypeListener()
+
+        if (transactionIdToEdit != null && transactionToEdit == null) {
+            // Если ID есть, но транзакция еще не загружена (например, после поворота)
+            loadTransactionDataAndPopulateForm()
+        } else if (transactionIdToEdit != null && transactionToEdit != null) {
+            // Транзакция уже была загружена ранее (например, до поворота)
+            // Просто заполняем форму еще раз, чтобы восстановить состояние UI
+            populateFormWithExistingData()
+        } else {
+            // Режим добавления: инициализируем значения по умолчанию
+            updateDateInView() // Устанавливаем текущую дату
+            loadCategoriesForType(TransactionType.EXPENSE) // Загружаем категории для расходов по умолчанию
+        }
 
         binding.buttonSaveTransaction.setOnClickListener {
-            saveTransaction() // Вызываем тот же метод сохранения, что и раньше
+            saveTransaction()
+        }
+    }
+
+    // Загрузка данных транзакции (вызывается, если transactionToEdit еще null)
+    private fun loadTransactionDataAndPopulateForm() {
+        Log.d("AddTransactionForm", "Loading transaction data...")
+        transactionIdToEdit?.let { id ->
+            transactionToEdit = SharedPreferencesManager.loadTransactions().find { it.id == id }
+            if (transactionToEdit != null) {
+                populateFormWithExistingData() // Заполняем форму после загрузки
+            } else {
+                Log.e("AddTransactionForm", "Failed to load transaction to edit with ID $id during population")
+                Toast.makeText(requireContext(), "Ошибка загрузки транзакции", Toast.LENGTH_SHORT).show()
+                activity?.setResult(Activity.RESULT_CANCELED)
+                activity?.finish()
+            }
+        }
+    }
+
+    // Заполнение полей формы данными из transactionToEdit
+    private fun populateFormWithExistingData() {
+        val transaction = transactionToEdit ?: return // Если транзакция null, выходим
+        Log.d("AddTransactionForm", "Populating form for transaction: ${transaction.id}")
+
+        binding.editTextAmount.setText(transaction.amount.toString())
+        binding.editTextDescription.setText(transaction.description ?: "")
+        calendar.time = transaction.date
+        updateDateInView()
+
+        if (transaction.type == TransactionType.INCOME) {
+            binding.radioIncome.isChecked = true
+        } else {
+            binding.radioExpense.isChecked = true
+        }
+
+        // Загружаем категории для нужного типа и ВЫБИРАЕМ нужную ПОСЛЕ загрузки
+        loadCategoriesForType(transaction.type) {
+            val categoryPosition = categoriesForSpinner.indexOfFirst { it.id == transaction.categoryId }
+            if (categoryPosition >= 0) {
+                binding.spinnerCategory.setSelection(categoryPosition)
+                selectedCategory = categoriesForSpinner[categoryPosition] // Убедимся, что selectedCategory установлен
+                Log.d("AddTransactionForm", "Category '${selectedCategory?.name}' selected at position $categoryPosition")
+            } else {
+                Log.w("AddTransactionForm", "Category ${transaction.categoryId} not found in spinner for type ${transaction.type}")
+                if (categoriesForSpinner.isNotEmpty()) {
+                    binding.spinnerCategory.setSelection(0) // Выбираем первую, если не нашли
+                    selectedCategory = categoriesForSpinner[0]
+                } else {
+                    selectedCategory = null // Категорий вообще нет
+                }
+            }
         }
     }
 
     private fun setupDatePicker() {
-        // Создаем слушатель для DatePickerDialog
-        val dateSetListener =
-            DatePickerDialog.OnDateSetListener { _, year, monthOfYear, dayOfMonth ->
-                calendar.set(Calendar.YEAR, year)
-                calendar.set(Calendar.MONTH, monthOfYear)
-                calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth)
-                updateDateInView() // Обновляем текст в поле ввода
-            }
-
-        // Устанавливаем слушатель клика на поле ввода даты
+        val dateSetListener = DatePickerDialog.OnDateSetListener { _, year, monthOfYear, dayOfMonth ->
+            calendar.set(Calendar.YEAR, year)
+            calendar.set(Calendar.MONTH, monthOfYear)
+            calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth)
+            updateDateInView()
+        }
+        binding.editTextDate.setOnClickListener { /*...*/ } // Код без изменений
+        binding.inputLayoutDate.setOnClickListener { /*...*/ } // Код без изменений
         binding.editTextDate.setOnClickListener {
             DatePickerDialog(
                 requireContext(),
@@ -74,147 +166,142 @@ class AddTransactionFormFragment : Fragment() {
                 calendar.get(Calendar.DAY_OF_MONTH)
             ).show()
         }
-        // Также обрабатываем клик на родительский TextInputLayout
         binding.inputLayoutDate.setOnClickListener {
             binding.editTextDate.performClick()
         }
     }
 
-    // Обновляет текст в поле даты
     private fun updateDateInView() {
         binding.editTextDate.setText(dateFormat.format(calendar.time))
     }
 
     private fun setupCategorySpinner() {
-        // Создаем адаптер для Spinner (будем показывать только имена категорий)
-        categoryAdapter = ArrayAdapter(
-            requireContext(),
-            android.R.layout.simple_spinner_item,
-            mutableListOf<String>()
-        )
+        categoryAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, mutableListOf<String>())
         categoryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         binding.spinnerCategory.adapter = categoryAdapter
 
-        // Слушатель выбора элемента в Spinner
-        binding.spinnerCategory.onItemSelectedListener =
-            object : AdapterView.OnItemSelectedListener {
-                override fun onItemSelected(
-                    parent: AdapterView<*>?,
-                    view: View?,
-                    position: Int,
-                    id: Long
-                ) {
-                    // Сохраняем выбранную категорию
-                    if (position >= 0 && position < categoriesForSpinner.size) {
-                        selectedCategory = categoriesForSpinner[position]
-                    } else {
-                        selectedCategory = null
-                    }
+        binding.spinnerCategory.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                selectedCategory = if (position >= 0 && position < categoriesForSpinner.size) {
+                    categoriesForSpinner[position]
+                } else {
+                    null
                 }
-
-                override fun onNothingSelected(parent: AdapterView<*>?) {
-                    selectedCategory = null
-                }
+                Log.d("AddTransactionForm", "Spinner item selected: ${selectedCategory?.name}")
             }
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+                selectedCategory = null
+            }
+        }
     }
 
     private fun setupTransactionTypeListener() {
         binding.radioGroupTransactionType.setOnCheckedChangeListener { _, checkedId ->
-            val selectedType =
-                if (checkedId == R.id.radio_income) TransactionType.INCOME else TransactionType.EXPENSE
-            // Перезагружаем категории в Spinner для выбранного типа
-            loadCategoriesForType(selectedType)
+            val selectedType = if (checkedId == R.id.radio_income) TransactionType.INCOME else TransactionType.EXPENSE
+            Log.d("AddTransactionForm", "Transaction type changed to: $selectedType")
+            // Перезагружаем категории и сбрасываем выбор в спиннере,
+            // так как старая категория может быть невалидна для нового типа
+            loadCategoriesForType(selectedType) {
+                // После загрузки нового списка категорий, если он не пуст, выбираем первую
+                if (categoriesForSpinner.isNotEmpty()) {
+                    binding.spinnerCategory.setSelection(0)
+                    selectedCategory = categoriesForSpinner[0]
+                } else {
+                    selectedCategory = null
+                }
+            }
         }
     }
 
-    private fun loadCategoriesForType(type: TransactionType) {
+    // Обновленная версия loadCategoriesForType с колбэком
+    private fun loadCategoriesForType(type: TransactionType, onLoaded: (() -> Unit)? = null) {
+        Log.d("AddTransactionForm", "Loading categories for type: $type")
         categoriesForSpinner = SharedPreferencesManager.getCategoriesByType(type)
-        // Получаем только имена категорий для отображения в адаптере
         val categoryNames = categoriesForSpinner.map { it.name }
 
-        // Обновляем данные в адаптере Spinner
         categoryAdapter.clear()
         if (categoryNames.isNotEmpty()) {
             categoryAdapter.addAll(categoryNames)
-            // Сбрасываем выбор, чтобы onItemSelected сработал для первого элемента
-            binding.spinnerCategory.setSelection(0, false)
-            // Вызываем onItemSelected вручную для установки selectedCategory для первого элемента
-            binding.spinnerCategory.post { // Используем post, чтобы дождаться отрисовки
-                binding.spinnerCategory.onItemSelectedListener?.onItemSelected(
-                    binding.spinnerCategory,
-                    null,
-                    0,
-                    0
-                )
+            binding.spinnerCategory.isEnabled = true // Включаем спиннер
+            // Вызываем колбэк после обновления данных адаптера
+            // Запускаем через post, чтобы дать время адаптеру обновиться
+            binding.spinnerCategory.post {
+                // Выбираем первую категорию по умолчанию, если не режим редактирования
+                if (transactionToEdit == null || transactionToEdit?.type != type) {
+                    binding.spinnerCategory.setSelection(0, false)
+                    // Вызываем onItemSelected вручную, чтобы selectedCategory установился
+                    binding.spinnerCategory.onItemSelectedListener?.onItemSelected(binding.spinnerCategory, null, 0, 0)
+                }
+                onLoaded?.invoke() // Вызываем внешний колбэк
+                Log.d("AddTransactionForm", "Categories loaded. Executing onLoaded callback.")
             }
         } else {
-            // Если категорий нет, показываем сообщение (можно добавить TextView для этого)
-            categoryAdapter.add("Нет категорий для этого типа")
+            categoryAdapter.add("Нет категорий")
+            binding.spinnerCategory.isEnabled = false // Отключаем спиннер
             selectedCategory = null
+            // Вызываем колбэк даже если категорий нет
+            binding.spinnerCategory.post {
+                onLoaded?.invoke()
+                Log.d("AddTransactionForm", "No categories found. Executing onLoaded callback.")
+            }
         }
         categoryAdapter.notifyDataSetChanged()
-
     }
 
+    // Обновленный метод сохранения
     fun saveTransaction() {
-        // 1. Получаем данные из полей ввода
+        // 1. Валидация суммы
         val amountStr = binding.editTextAmount.text.toString()
-        // ... (остальная логика получения данных: description, selectedTypeId) ...
-
-        // 2. Валидация суммы
-        if (amountStr.isBlank() || amountStr == ".") {
-            binding.inputLayoutAmount.error = "Введите сумму"
-            return
-        } else {
-            binding.inputLayoutAmount.error = null
-        }
+        if (amountStr.isBlank() || amountStr == ".") { binding.inputLayoutAmount.error = "Введите сумму"; return } else { binding.inputLayoutAmount.error = null }
         val amount = amountStr.toDoubleOrNull()
-        if (amount == null || amount <= 0) {
-            binding.inputLayoutAmount.error = "Неверная сумма"
-            return
-        } else {
-            binding.inputLayoutAmount.error = null
-        }
+        if (amount == null || amount <= 0) { binding.inputLayoutAmount.error = "Неверная сумма"; return } else { binding.inputLayoutAmount.error = null }
 
-        // 3. Валидация категории (из Spinner)
-        if (selectedCategory == null) {
-            Toast.makeText(requireContext(), "Выберите категорию", Toast.LENGTH_SHORT).show()
-            // Можно добавить подсветку Spinner
-            return
-        }
+        // 2. Валидация категории
+        if (selectedCategory == null) { Toast.makeText(requireContext(), "Выберите категорию", Toast.LENGTH_SHORT).show(); return }
 
-        // 4. Определяем тип транзакции
-        val transactionType = when (binding.radioGroupTransactionType.checkedRadioButtonId) { // Используем binding здесь
+        // 3. Определяем тип транзакции
+        val transactionType = when (binding.radioGroupTransactionType.checkedRadioButtonId) {
             R.id.radio_income -> TransactionType.INCOME
             R.id.radio_expense -> TransactionType.EXPENSE
-            else -> {
-                Toast.makeText(requireContext(), "Выберите тип транзакции", Toast.LENGTH_SHORT).show()
-                return
-            }
+            else -> { Toast.makeText(requireContext(), "Выберите тип", Toast.LENGTH_SHORT).show(); return }
         }
 
-        // 5. Создаем объект Transaction
-        val newTransaction = Transaction(
+        // 4. Создаем объект Transaction
+        val transactionData = Transaction(
+            id = transactionIdToEdit ?: UUID.randomUUID().toString(), // Используем старый ID или генерируем новый
             amount = amount,
             type = transactionType,
-            categoryId = selectedCategory!!.id, // Используем ID выбранной категории
-            description = binding.editTextDescription.text.toString().trim().ifBlank { null }, // Используем binding
+            categoryId = selectedCategory!!.id,
+            description = binding.editTextDescription.text.toString().trim().ifBlank { null },
             date = calendar.time
         )
 
-        // 6. Сохраняем через SharedPreferencesManager и закрываем Activity
+        // 5. Сохраняем через нужный метод SharedPreferencesManager
         try {
-            SharedPreferencesManager.addTransaction(newTransaction)
-            Toast.makeText(requireContext(), "Транзакция сохранена", Toast.LENGTH_SHORT).show()
-            activity?.setResult(AppCompatActivity.RESULT_OK) // Устанавливаем результат
-            activity?.finish() // Закрываем
+            val isEditMode = (transactionIdToEdit != null)
+            if (isEditMode) {
+                SharedPreferencesManager.updateTransaction(transactionData)
+                Toast.makeText(requireContext(), "Транзакция обновлена", Toast.LENGTH_SHORT).show()
+                Log.d("AddTransactionForm", "Transaction updated: ${transactionData.id}")
+            } else {
+                SharedPreferencesManager.addTransaction(transactionData)
+                Toast.makeText(requireContext(), "Транзакция сохранена", Toast.LENGTH_SHORT).show()
+                Log.d("AddTransactionForm", "Transaction added: ${transactionData.id}")
+            }
+            // Устанавливаем результат OK и закрываем Activity
+            activity?.setResult(Activity.RESULT_OK)
+            activity?.finish()
         } catch (e: Exception) {
-            Toast.makeText(requireContext(), "Ошибка сохранения: ${e.message}", Toast.LENGTH_LONG).show()
+            val action = if (transactionIdToEdit != null) "обновлении" else "сохранении"
+            Toast.makeText(requireContext(), "Ошибка при $action: ${e.message}", Toast.LENGTH_LONG).show()
+            Log.e("AddTransactionForm", "Error saving/updating transaction", e)
             e.printStackTrace()
         }
     }
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+        Log.d("AddTransactionForm", "onDestroyView")
     }
 }

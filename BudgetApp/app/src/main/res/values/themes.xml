@@ -1,9 +1,34 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
+    <!-- Базовая тема приложения (Светлая) -->
     <style name="Base.Theme.BudgetApp" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <!-- Primary brand color. -->
+        <item name="colorPrimary">@color/purple_500</item>
+        <item name="colorPrimaryVariant">@color/purple_700</item> <!-- Или colorPrimaryContainer -->
+        <item name="colorOnPrimary">@color/white</item>
+        <!-- Secondary brand color. -->
+        <item name="colorSecondary">@color/teal_200</item>
+        <item name="colorSecondaryVariant">@color/teal_700</item> <!-- Или colorSecondaryContainer -->
+        <item name="colorOnSecondary">@color/black</item>
+        <!-- Status bar color. -->
+        <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
+
+        <!-- Используем атрибуты Material для поверхностей и текста на них -->
+        <!-- colorSurface будет использоваться для фона карточек, диалогов и т.д. -->
+        <!-- Для основного фона окна будет использоваться стандартный цвет фона DayNight темы -->
+        <item name="colorSurface">@color/surface_light</item>
+        <item name="colorOnSurface">@color/on_surface_light</item>
+
+        <!-- Если нужно явно задать цвет основного фона окна -->
+        <!-- <item name="android:windowBackground">@color/background_light</item> -->
+        <!-- Но обычно лучше оставить стандартное поведение DayNight -->
+
+        <!-- Customize your theme here. -->
     </style>
 
     <style name="Theme.BudgetApp" parent="Base.Theme.BudgetApp" />
+
+    <!-- Стили для AppBar (если используешь AppCompat Toolbar) -->
+    <style name="Theme.BudgetApp.AppBarOverlay" parent="ThemeOverlay.Material3.Dark.ActionBar" />
+    <style name="Theme.BudgetApp.PopupOverlay" parent="ThemeOverlay.Material3.Light" />
+
 </resources>
