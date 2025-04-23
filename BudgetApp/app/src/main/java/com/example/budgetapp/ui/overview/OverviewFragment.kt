@@ -1,17 +1,21 @@
-package com.example.budgetapp.ui.overview // Убедитесь, что пакет правильный
+package com.example.budgetapp.ui.overview
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.content.ContextCompat // Для доступа к цветам
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import com.example.budgetapp.R // Для доступа к ресурсам (цветам)
+import androidx.navigation.fragment.findNavController // Импорт для навигации
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.budgetapp.R
 import com.example.budgetapp.SharedPreferencesManager
-import com.example.budgetapp.databinding.FragmentOverviewBinding // Импортируем ViewBinding
+import com.example.budgetapp.databinding.FragmentOverviewBinding
 import com.example.budgetapp.model.Transaction
 import com.example.budgetapp.model.TransactionType
-import java.text.NumberFormat // Для форматирования валюты
+import com.example.budgetapp.ui.transactions.TransactionAdapter // Импорт адаптера
+import java.text.NumberFormat
 import java.util.Calendar
 import java.util.Locale
 
@@ -20,8 +24,9 @@ class OverviewFragment : Fragment() {
     private var _binding: FragmentOverviewBinding? = null
     private val binding get() = _binding!!
 
-    // Форматтер валюты
-    private fun getFormatter(): NumberFormat = SharedPreferencesManager.getCurrencyFormatter()
+    private val currencyFormatter: NumberFormat by lazy { SharedPreferencesManager.getCurrencyFormatter() }
+    // Адаптер для недавних транзакций
+    private lateinit var recentTransactionAdapter: TransactionAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -33,36 +38,80 @@ class OverviewFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        loadAndDisplayOverview()
+
+        setupRecentTransactionsRecyclerView() // Настраиваем RecyclerView
+        loadAndDisplayOverview() // Загружаем все данные
+
+        // Настраиваем кнопку "Все"
+        binding.buttonSeeAllTransactions.setOnClickListener {
+            try {
+                // Переходим к фрагменту списка всех транзакций
+                findNavController().navigate(R.id.nav_transactions_list)
+            } catch (e: Exception) {
+                Log.e("OverviewFragment", "Navigation failed", e)
+                // Можно показать Toast или обработать ошибку иначе
+            }
+        }
     }
 
-    // Этот метод будет вызываться при возвращении на фрагмент (например, после добавления транзакции)
-    // чтобы обновить данные.
     override fun onResume() {
         super.onResume()
-        // Перезагружаем данные при каждом возвращении на экран,
-        // так как транзакции могли измениться.
-        loadAndDisplayOverview()
+        loadAndDisplayOverview() // Обновляем все данные при возвращении
     }
 
-    internal fun loadAndDisplayOverview() {
-        val transactions = SharedPreferencesManager.loadTransactions()
-        val formatter = getFormatter() // Получаем актуальный форматтер
+    // Настройка RecyclerView для недавних транзакций
+    private fun setupRecentTransactionsRecyclerView() {
+        // Создаем адаптер. Клик по элементу здесь пока не обрабатываем (пустая лямбда)
+        recentTransactionAdapter = TransactionAdapter(mutableListOf(), requireContext()) { /* No action on click here */ }
 
+        binding.recyclerViewRecentTransactions.apply {
+            layoutManager = LinearLayoutManager(context)
+            adapter = recentTransactionAdapter
+            // Отключаем вложенную прокрутку, так как у нас NestedScrollView
+            isNestedScrollingEnabled = false
+        }
+    }
+
+
+    internal fun loadAndDisplayOverview() {
+        Log.d("OverviewFragment", "Loading and displaying overview data...")
+        val transactions = SharedPreferencesManager.loadTransactions()
+        val formatter = SharedPreferencesManager.getCurrencyFormatter() // Получаем актуальный форматтер
+
+        // --- Общий баланс ---
         val totalBalance = calculateTotalBalance(transactions)
-        binding.textBalanceAmount.text = formatter.format(totalBalance) // Используем его
+        binding.textBalanceAmount.text = formatter.format(totalBalance)
         val balanceColorRes = if (totalBalance >= 0) R.color.income_color else R.color.expense_color
         binding.textBalanceAmount.setTextColor(ContextCompat.getColor(requireContext(), balanceColorRes))
 
+        // --- Сводка за месяц ---
         val (monthlyIncome, monthlyExpense) = calculateMonthlySummary(transactions)
-        binding.textMonthlyIncome.text = formatter.format(monthlyIncome) // Используем его
-        binding.textMonthlyExpenses.text = formatter.format(monthlyExpense) // Используем его
+        binding.textMonthlyIncome.text = formatter.format(monthlyIncome)
+        binding.textMonthlyExpenses.text = formatter.format(monthlyExpense)
 
-        // TODO: Позже можно добавить график или более детальную информацию
+        // --- Недавние транзакции ---
+        // Сортируем по дате (самые новые сначала)
+        val sortedTransactions = transactions.sortedByDescending { it.date }
+        // Берем первые N (например, 5)
+        val recentTransactions = sortedTransactions.take(5)
+
+        Log.d("OverviewFragment", "Recent transactions count: ${recentTransactions.size}")
+
+        // Обновляем адаптер недавних транзакций
+        recentTransactionAdapter.updateData(recentTransactions)
+
+        // Показываем/скрываем RecyclerView и текст "Нет недавних транзакций"
+        if (recentTransactions.isEmpty()) {
+            binding.recyclerViewRecentTransactions.visibility = View.GONE
+            binding.textNoRecentTransactions.visibility = View.VISIBLE
+        } else {
+            binding.recyclerViewRecentTransactions.visibility = View.VISIBLE
+            binding.textNoRecentTransactions.visibility = View.GONE
+        }
     }
 
-    // Функция расчета общего баланса
-    private fun calculateTotalBalance(transactions: List<Transaction>): Double {
+    // --- Функции расчета (без изменений) ---
+    private fun calculateTotalBalance(transactions: List<Transaction>): Double { /* ... */
         var balance = 0.0
         for (transaction in transactions) {
             when (transaction.type) {
@@ -72,9 +121,7 @@ class OverviewFragment : Fragment() {
         }
         return balance
     }
-
-    // Функция расчета доходов/расходов за текущий месяц
-    private fun calculateMonthlySummary(transactions: List<Transaction>): Pair<Double, Double> {
+    private fun calculateMonthlySummary(transactions: List<Transaction>): Pair<Double, Double> { /* ... */
         var income = 0.0
         var expense = 0.0
         val currentMonth = Calendar.getInstance().get(Calendar.MONTH)
@@ -95,6 +142,7 @@ class OverviewFragment : Fragment() {
         }
         return Pair(income, expense)
     }
+    // ------------------------------------
 
     override fun onDestroyView() {
         super.onDestroyView()
