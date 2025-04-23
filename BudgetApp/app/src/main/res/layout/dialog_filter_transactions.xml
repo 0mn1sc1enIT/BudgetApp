@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp">
+
+        <!-- Фильтр по типу -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Тип транзакции:"
+            android:textAppearance="?attr/textAppearanceTitleMedium"
+            android:textColor="?android:attr/textColorPrimary"
+            android:layout_marginBottom="8dp"/>
+
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/chipgroup_filter_type"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:singleSelection="true"
+            app:selectionRequired="true">
+            <!-- Чипы будут добавлены программно -->
+        </com.google.android.material.chip.ChipGroup>
+
+        <!-- Фильтр по категориям -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Категории:"
+            android:textAppearance="?attr/textAppearanceTitleMedium"
+            android:textColor="?android:attr/textColorPrimary"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="8dp"/>
+
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/chipgroup_filter_category"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:singleSelection="false">
+            <!-- Чипы будут добавлены программно -->
+        </com.google.android.material.chip.ChipGroup>
+
+    </LinearLayout>
+</ScrollView>
