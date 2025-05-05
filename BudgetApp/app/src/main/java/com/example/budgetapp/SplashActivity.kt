@@ -1,35 +1,31 @@
 package com.example.budgetapp // Убедитесь, что пакет правильный
 
-import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import com.example.budgetapp.databinding.ActivitySplashBinding // Импорт биндинга
 
-@SuppressLint("CustomSplashScreen") // Мы используем библиотеку androidx
 class SplashActivity : AppCompatActivity() {
+
+    private lateinit var binding: ActivitySplashBinding
+    // Время показа сплеш-скрина в миллисекундах (например, 2 секунды)
+    private val SPLASH_TIMEOUT = 2000L
+
     override fun onCreate(savedInstanceState: Bundle?) {
-        // Устанавливаем SplashScreen ДО super.onCreate()
-        val splashScreen = installSplashScreen()
-
         super.onCreate(savedInstanceState)
-        // setContentView(R.layout.activity_splash) // Layout не обязателен для этого подхода
+        binding = ActivitySplashBinding.inflate(layoutInflater)
+        setContentView(binding.root) // Устанавливаем наш layout
 
-        // Здесь НЕ нужно использовать Handler или Coroutine для задержки.
-        // Библиотека сама показывает тему до готовности основного Activity.
+        // Используем Handler для задержки перехода на MainActivity
+        Handler(Looper.getMainLooper()).postDelayed({
+            // Создаем Intent для перехода на MainActivity
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
 
-        // Опционально: можно удерживать сплеш-скрин дольше, если идет загрузка данных
-        // splashScreen.setKeepOnScreenCondition { /* условие удержания, например !viewModel.isReady() */ true } // Пока просто true для примера
-
-        // Сразу переходим к MainActivity
-        startMainActivity()
-    }
-
-    private fun startMainActivity() {
-        // Создаем Intent для перехода на MainActivity
-        val intent = Intent(this, MainActivity::class.java)
-        startActivity(intent)
-        // Завершаем SplashActivity, чтобы пользователь не мог вернуться на нее кнопкой "назад"
-        finish()
+            // Завершаем SplashActivity, чтобы пользователь не мог вернуться на нее кнопкой "назад"
+            finish()
+        }, SPLASH_TIMEOUT)
     }
 }

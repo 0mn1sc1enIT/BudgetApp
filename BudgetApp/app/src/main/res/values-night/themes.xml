@@ -31,6 +31,11 @@
 
     </style>
 
+    <style name="Theme.BudgetApp.Splash">
+        <!-- Иконки статус бара должны быть светлыми -->
+        <item name="android:windowLightStatusBar" >false</item>
+    </style>
+
     <!-- Стили для AppBar (если используешь AppCompat Toolbar) -->
     <!-- Для темной темы оставляем Dark.ActionBar для AppBarOverlay -->
     <!-- PopupOverlay делаем темным -->

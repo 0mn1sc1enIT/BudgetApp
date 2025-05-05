@@ -33,18 +33,13 @@
     <!-- Финальная тема -->
     <style name="Theme.BudgetApp" parent="Base.Theme.BudgetApp" />
 
-    <style name="Theme.App.Starting" parent="Theme.SplashScreen">
-        <!-- Цвет фона Splash Screen (возьмем цвет фона основной темы) -->
-        <item name="windowSplashScreenBackground">?attr/colorSurface</item>
-
-        <!-- Иконка, которая будет отображаться (используем стандартный mipmap) -->
-        <!-- Замените @mipmap/ic_launcher на вашу адаптивную иконку, если вы ее создали -->
-        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
-        <!-- Для анимации можно использовать AnimatedVectorDrawable -->
-        <!-- <item name="windowSplashScreenAnimationDuration">1000</item> -->
-
-        <!-- Тема, к которой будет переход ПОСЛЕ Splash Screen -->
-        <item name="postSplashScreenTheme">@style/Theme.BudgetApp</item>
+    <style name="Theme.BudgetApp.Splash" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Устанавливаем фон окна, совпадающий с фоном layout'а -->
+        <item name="android:windowBackground">?attr/colorSurface</item>
+        <!-- Убедимся, что статус бар тоже соответствует (опционально) -->
+        <item name="android:statusBarColor">?attr/colorSurface</item>
+        <!-- Установим стиль иконок статус бара в зависимости от темы -->
+        <item name="android:windowLightStatusBar" >true</item> <!-- true для светлой -->
     </style>
 
     <!-- Стили для AppBar (если используешь AppCompat Toolbar) -->
