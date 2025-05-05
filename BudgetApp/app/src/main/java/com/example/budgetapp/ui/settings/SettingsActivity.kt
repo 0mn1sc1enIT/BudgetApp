@@ -3,7 +3,10 @@ package com.example.budgetapp.ui.settings
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
 import com.example.budgetapp.R
 import com.example.budgetapp.SharedPreferencesManager
 import com.example.budgetapp.databinding.ActivitySettingsBinding
@@ -28,6 +31,18 @@ class SettingsActivity : AppCompatActivity() {
             supportFragmentManager.beginTransaction()
                 .replace(R.id.fragment_container_settings, SettingsMainFragment())
                 .commit()
+        }
+        val appBarLayout = binding.appBarLayoutSettings
+
+        ViewCompat.setOnApplyWindowInsetsListener(appBarLayout) { view, windowInsets ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+
+            // Применяем верхний отступ как padding top для AppBarLayout
+            // Это сдвинет Toolbar вниз, но фон AppBarLayout останется под статус баром
+            view.updatePadding(top = insets.top)
+
+            // Возвращаем исходные инсеты, чтобы другие view тоже могли их обработать
+            windowInsets
         }
     }
 

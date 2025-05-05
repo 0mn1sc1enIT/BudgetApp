@@ -5,7 +5,10 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
 import com.example.budgetapp.R
 import com.example.budgetapp.SharedPreferencesManager
 import com.example.budgetapp.databinding.ActivityAddTransactionBinding
@@ -65,6 +68,20 @@ class AddTransactionActivity : AppCompatActivity() {
             supportFragmentManager.beginTransaction()
                 .replace(R.id.fragment_container_add_transaction, fragmentToShow)
                 .commitNow() // Используем commitNow для синхронности, если нужно сразу работать с фрагментом
+        }
+
+        val appBarLayout = binding.appBarLayoutAdd // Получите ваш AppBarLayout по ID из binding
+// ИЛИ val appBarLayout = findViewById<AppBarLayout>(R.id.app_bar_layout_settings)
+
+        ViewCompat.setOnApplyWindowInsetsListener(appBarLayout) { view, windowInsets ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+
+            // Применяем верхний отступ как padding top для AppBarLayout
+            // Это сдвинет Toolbar вниз, но фон AppBarLayout останется под статус баром
+            view.updatePadding(top = insets.top)
+
+            // Возвращаем исходные инсеты, чтобы другие view тоже могли их обработать
+            windowInsets
         }
         // Если savedInstanceState != null, система сама восстановит фрагмент с его аргументами
     }
