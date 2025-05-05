@@ -174,7 +174,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // --- Остальные методы ---
     private val addTransactionLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->

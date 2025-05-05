@@ -20,6 +20,8 @@ object SharedPreferencesManager {
     private const val KEY_CATEGORIES = "categories_list"
     private const val KEY_CURRENCY_SYMBOL = "currency_symbol"
     private const val DEFAULT_CURRENCY_SYMBOL = "₸"
+    private const val KEY_DARK_MODE_ENABLED = "dark_mode_enabled"
+
 
     private lateinit var sharedPreferences: SharedPreferences
     private val gson = Gson() // Создаем экземпляр Gson для сериализации/десериализации
@@ -47,8 +49,16 @@ object SharedPreferencesManager {
         }
 
         // Используем TypeToken для указания Gson, что мы хотим десериализовать список объектов Transaction
-        val type = object : TypeToken<MutableList<Transaction>>() {}.type
-        return gson.fromJson(jsonTransactions, type) ?: mutableListOf() // Десериализуем и возвращаем, или пустой список если ошибка
+        try {
+            val type = object : TypeToken<MutableList<Transaction>>() {}.type
+            return gson.fromJson(jsonTransactions, type) ?: mutableListOf() // Десериализуем и возвращаем, или пустой список если ошибка
+        } catch (e: Exception) {
+            Log.e("SharedPreferencesManager", "Error parsing transactions JSON", e)
+            // Ошибка парсинга, возвращаем пустой список, чтобы не крашить приложение
+            // и опционально чистим некорректные данные
+            // clearAllTransactions() // Раскомментировать, если хотите очищать при ошибке
+            return mutableListOf()
+        }
     }
 
     // Метод для добавления одной транзакции (удобно)
@@ -72,6 +82,8 @@ object SharedPreferencesManager {
         if (index != -1) {
             currentTransactions[index] = updatedTransaction
             saveTransactions(currentTransactions)
+        } else {
+            Log.w("SharedPreferencesManager", "Transaction with ID ${updatedTransaction.id} not found for update.")
         }
     }
 
@@ -129,8 +141,25 @@ object SharedPreferencesManager {
         if (currentCategories.none { it.name.equals(category.name, ignoreCase = true) && it.type == category.type }) {
             currentCategories.add(category)
             saveCategories(currentCategories)
+        } else {
+            Log.w("SharedPreferencesManager", "Category '${category.name}' (${category.type}) already exists.")
         }
     }
+
+    // Удаление категории по ID
+    fun deleteCategory(categoryId: String) {
+        val currentCategories = loadCategories()
+        val removed = currentCategories.removeAll { it.id == categoryId }
+        if (removed) {
+            saveCategories(currentCategories)
+            Log.d("SharedPreferencesManager", "Category with ID $categoryId deleted.")
+            // TODO: Подумать об удалении или переназначении транзакций с этой категорией
+            // Например, можно найти все транзакции с этим categoryId и установить его в null или "Другое"
+        } else {
+            Log.w("SharedPreferencesManager", "Category with ID $categoryId not found for deletion.")
+        }
+    }
+
 
     // Получение категории по ID
     fun getCategoryById(categoryId: String): Category? {
@@ -165,10 +194,10 @@ object SharedPreferencesManager {
     }
 
     // Метод для очистки ВСЕХ данных (транзакций и категорий)
-    // Вызовите его ОДИН РАЗ для сброса старых данных транзакций без categoryId
     fun clearAllData() {
         checkInitialized()
         sharedPreferences.edit().clear().apply() // Очищает ВСЕ данные в этом файле SharedPreferences
+        Log.i("SharedPreferencesManager", "All data cleared.")
     }
 
     // Метод для сохранения символа валюты
@@ -184,7 +213,6 @@ object SharedPreferencesManager {
         return sharedPreferences.getString(KEY_CURRENCY_SYMBOL, DEFAULT_CURRENCY_SYMBOL) ?: DEFAULT_CURRENCY_SYMBOL
     }
 
-    private const val KEY_DARK_MODE_ENABLED = "dark_mode_enabled"
 
     // Новый метод для сохранения настройки темы (boolean)
     fun saveDarkModeEnabled(isDarkMode: Boolean) {

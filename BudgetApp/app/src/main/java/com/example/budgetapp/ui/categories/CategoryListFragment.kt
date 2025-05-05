@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog // Импорт для диалога
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.ConcatAdapter // Импорт ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -58,13 +59,13 @@ class CategoryListFragment : Fragment() {
     // Инициализация всех адаптеров
     private fun setupAdapters() {
         val onCategoryClickAction = { category: Category ->
-            // TODO: Обработка клика (например, переход к редактированию)
+            // TODO: Обработка клика (например, переход к редактированию) - Оставляем Toast
             Toast.makeText(requireContext(), "Клик: ${category.name}", Toast.LENGTH_SHORT).show()
         }
         val onCategoryLongClickAction = { category: Category ->
-            // TODO: Обработка долгого клика (например, удаление с подтверждением)
-            Toast.makeText(requireContext(), "Долгий клик: ${category.name}", Toast.LENGTH_SHORT).show()
-            true // Возвращаем true, если событие обработано
+            // Показываем диалог подтверждения удаления
+            showDeleteCategoryConfirmationDialog(category)
+            true // Возвращаем true, т.к. событие обработано (диалог показан)
         }
 
         // Создаем адаптеры заголовков
@@ -135,6 +136,32 @@ class CategoryListFragment : Fragment() {
         dialogFragment.setTargetFragment(this, ADD_CATEGORY_REQUEST_CODE)
         dialogFragment.show(parentFragmentManager, "AddCategoryDialog")
     }
+
+    // Диалог подтверждения удаления категории
+    private fun showDeleteCategoryConfirmationDialog(category: Category) {
+        AlertDialog.Builder(requireContext())
+            .setTitle("Удалить категорию?")
+            .setMessage("Вы уверены, что хотите удалить категорию \"${category.name}\"?")
+            .setIcon(android.R.drawable.ic_dialog_alert)
+            .setPositiveButton("Удалить") { _, _ ->
+                deleteCategory(category)
+            }
+            .setNegativeButton("Отмена", null)
+            .show()
+    }
+
+    // Логика удаления категории
+    private fun deleteCategory(category: Category) {
+        try {
+            SharedPreferencesManager.deleteCategory(category.id)
+            Toast.makeText(requireContext(), "Категория \"${category.name}\" удалена", Toast.LENGTH_SHORT).show()
+            loadCategories() // Перезагружаем список для обновления UI
+        } catch (e: Exception) {
+            Toast.makeText(requireContext(), "Ошибка при удалении категории: ${e.message}", Toast.LENGTH_LONG).show()
+            e.printStackTrace()
+        }
+    }
+
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)

@@ -1,19 +1,40 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Базовая тема приложения для НОЧИ -->
-    <!-- Просто наследуемся или переопределяем Material атрибуты -->
+    <!-- Тема для ночного режима -->
     <style name="Theme.BudgetApp" parent="Base.Theme.BudgetApp">
-        <!-- DayNight тема сама подхватит цвета из values-night/colors.xml -->
-        <!-- Можно переопределить, если нужно -->
-        <!-- <item name="colorSurface">@color/surface_dark</item> -->
-        <!-- <item name="colorOnSurface">@color/on_surface_dark</item> -->
-        <!-- <item name="android:windowBackground">@color/background_dark</item> -->
+        <!-- Переопределяем атрибуты M3, используя наши цвета для ТЕМНОЙ темы -->
+        <item name="colorPrimary">@color/colorPrimaryDark</item>
+        <item name="colorPrimaryVariant">@color/colorPrimaryVariantDark</item>
+        <item name="colorSecondary">@color/colorSecondaryDark</item>
+        <item name="colorSecondaryVariant">@color/colorSecondaryVariantDark</item>
+        <item name="colorSurface">@color/colorSurfaceDark</item>
+        <item name="android:colorBackground">@color/colorBackgroundDark</item>
+        <item name="colorError">@color/colorErrorDark</item>
 
-        <!-- Для темной темы часто полезно указать, что иконки статус бара должны быть светлыми -->
-        <item name="android:windowLightStatusBar" >false</item>
+        <item name="colorOnPrimary">@color/colorOnPrimaryDark</item>
+        <item name="colorOnSecondary">@color/colorOnSecondaryDark</item>
+        <item name="colorOnSurface">@color/colorOnSurfaceDark</item>
+        <item name="colorOnBackground">@color/colorOnBackgroundDark</item>
+        <item name="colorOnError">@color/colorOnErrorDark</item>
+
+        <!-- Status bar color -->
+        <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
+
+        <!-- Иконки статус бара должны быть светлыми -->
+        <item name="android:windowLightStatusBar" tools:targetApi="m">false</item>
+
+        <!-- Цвет контура -->
+        <item name="colorOutline">@color/colorOutlineDark</item>
+
+        <!-- Другие настройки -->
+        <item name="android:textColorPrimary">?attr/colorOnSurface</item> <!-- Текст на поверхности (светлый) -->
+        <item name="android:textColorSecondary">@color/app_text_secondary_dark</item> <!-- Вторичный текст (светло-серый) -->
+
     </style>
 
     <!-- Стили для AppBar (если используешь AppCompat Toolbar) -->
+    <!-- Для темной темы оставляем Dark.ActionBar для AppBarOverlay -->
+    <!-- PopupOverlay делаем темным -->
     <style name="Theme.BudgetApp.AppBarOverlay" parent="ThemeOverlay.Material3.Dark.ActionBar" />
-    <style name="Theme.BudgetApp.PopupOverlay" parent="ThemeOverlay.Material3.Dark" /> <!-- Для темной темы -->
+    <style name="Theme.BudgetApp.PopupOverlay" parent="ThemeOverlay.Material3.Dark" />
 
 </resources>

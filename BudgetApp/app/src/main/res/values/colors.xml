@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Основные Material цвета -->
+    <!-- Основные Material цвета (примеры) -->
     <color name="purple_200">#FFBB86FC</color>
     <color name="purple_500">#FF6200EE</color>
     <color name="purple_700">#FF3700B3</color>
@@ -9,42 +9,32 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 
-    <!-- Цвета для приложения (Светлая тема) -->
-    <color name="income_color">#4CAF50</color>
-    <color name="expense_color">#F44336</color>
+    <!-- Цвета для приложения (доход/расход) -->
+    <color name="income_color">#4CAF50</color> <!-- Зеленый для дохода -->
+    <color name="expense_color">#F44336</color> <!-- Красный для расхода -->
 
-    <!-- Базовые цвета для светлой темы -->
-    <color name="background_light">#FFFFFF</color>
-    <color name="surface_light">#FFFFFF</color>
-    <color name="on_primary_light">@color/white</color>
-    <color name="on_secondary_light">@color/black</color>
-    <color name="on_background_light">@color/black</color>
-    <color name="on_surface_light">@color/black</color>
-    <color name="text_secondary_light">#8A000000</color> <!-- 54% black -->
+    <!-- Явные цвета для светлой темы (если нужны где-то напрямую) -->
+    <color name="app_background_light">#FFFBFE</color> <!-- Чуть отличный от белого фон -->
+    <color name="app_surface_light">#FFFBFE</color>    <!-- Поверхности (карточки) могут быть такими же -->
+    <color name="app_text_primary_light">#1C1B1F</color>  <!-- Темный текст -->
+    <color name="app_text_secondary_light">#49454F</color> <!-- Серый текст -->
+    <color name="app_on_primary_light">@color/white</color> <!-- Текст на основной кнопке/тулбаре -->
+    <color name="app_on_secondary_light">@color/white</color> <!-- Текст на вторичных элементах -->
 
-    <!-- Даем им значения для светлой темы -->
-    <color name="background_dark">@color/background_light</color> <!-- Ссылаемся на светлый аналог -->
-    <color name="surface_dark">@color/surface_light</color>       <!-- Ссылаемся на светлый аналог -->
-    <color name="on_primary_dark">@color/on_primary_light</color> <!-- Ссылаемся на светлый аналог -->
-    <color name="on_secondary_dark">@color/on_secondary_light</color><!-- Ссылаемся на светлый аналог -->
-    <color name="on_background_dark">@color/on_background_light</color><!-- Ссылаемся на светлый аналог -->
-    <color name="on_surface_dark">@color/on_surface_light</color>    <!-- Ссылаемся на светлый аналог -->
-    <color name="text_secondary_dark">@color/text_secondary_light</color><!-- Ссылаемся на светлый аналог -->
-
-
-    <!-- Основные цвета темы (Material Components/Material 3) -->
-    <!-- Эти имена используются в атрибутах темы (colorPrimary, colorSurface и т.д.) -->
-    <!-- В светлой теме они будут ссылаться на светлые варианты -->
-    <color name="colorPrimary">@color/purple_500</color>
-    <color name="colorPrimaryVariant">@color/purple_700</color>
-    <color name="colorSecondary">@color/teal_200</color>
-    <color name="colorSecondaryVariant">@color/teal_700</color>
-    <color name="colorOnPrimary">@color/on_primary_light</color>
-    <color name="colorOnSecondary">@color/on_secondary_light</color>
-    <color name="colorSurface">@color/surface_light</color>
-    <color name="colorOnSurface">@color/on_surface_light</color>
-    <!-- android:colorBackground лучше не переопределять здесь напрямую для M3 -->
-    <color name="colorOnBackground">@color/on_background_light</color>
-
+    <!-- Основные цвета темы Material 3 для СВЕТЛОЙ темы -->
+    <!-- Эти имена используются в атрибутах темы (?attr/colorPrimary, ?attr/colorSurface и т.д.) -->
+    <color name="colorPrimaryLight">@color/purple_500</color>
+    <color name="colorPrimaryVariantLight">@color/purple_700</color>
+    <color name="colorSecondaryLight">@color/teal_200</color>
+    <color name="colorSecondaryVariantLight">@color/teal_700</color>
+    <color name="colorOnPrimaryLight">@color/app_on_primary_light</color>
+    <color name="colorOnSecondaryLight">@color/app_on_secondary_light</color>
+    <color name="colorSurfaceLight">@color/app_surface_light</color>
+    <color name="colorOnSurfaceLight">@color/app_text_primary_light</color>
+    <color name="colorBackgroundLight">@color/app_background_light</color>
+    <color name="colorOnBackgroundLight">@color/app_text_primary_light</color>
+    <color name="colorErrorLight">#B00020</color>
+    <color name="colorOnErrorLight">@color/white</color>
+    <color name="colorOutlineLight">#79747E</color>
 
 </resources>

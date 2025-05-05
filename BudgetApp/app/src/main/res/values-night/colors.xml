@@ -1,34 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Основные цвета Material для темной темы (могут отличаться) -->
-    <color name="purple_200">#FFBB86FC</color>
-    <color name="purple_500">#FF6200EE</color> <!-- Можно сделать менее насыщенным -->
-    <color name="purple_700">#FF3700B3</color> <!-- Тоже -->
-    <color name="teal_200">#FF03DAC5</color>
-    <color name="teal_700">#FF018786</color> <!-- Можно сделать ярче -->
+    <!-- Основные Material цвета (примеры для темной темы, можно настроить) -->
+    <color name="purple_200_dark">#FFBB86FC</color> <!-- Может быть основным -->
+    <color name="purple_500_dark">#A46EFF</color> <!-- Или более светлый основной -->
+    <color name="purple_700_dark">#3700B3</color> <!-- Более темный вариант -->
+    <color name="teal_200_dark">#FF03DAC5</color>
+    <color name="teal_700_dark">#80CBC4</color> <!-- Светлее вторичный -->
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 
-    <!-- Цвета для приложения (темные аналоги) -->
+    <!-- Цвета для приложения (доход/расход - светлые варианты для темного фона) -->
     <color name="income_color">#81C784</color> <!-- Светлее зеленый -->
     <color name="expense_color">#E57373</color> <!-- Светлее красный -->
-    <color name="background_dark">#121212</color> <!-- Стандартный темный фон -->
-    <color name="surface_dark">#1E1E1E</color> <!-- Цвет поверхностей (карточки и т.д.) -->
-    <color name="on_primary_dark">@color/black</color> <!-- Текст на Primary -->
-    <color name="on_secondary_dark">@color/black</color> <!-- Текст на Secondary -->
-    <color name="on_background_dark">@color/white</color> <!-- Текст на фоне -->
-    <color name="on_surface_dark">@color/white</color> <!-- Текст на поверхностях -->
-    <color name="text_secondary_dark">#B3FFFFFF</color> <!-- Полупрозрачный белый -->
 
-    <!-- Переопределяем цвета Material для темной темы -->
-    <color name="colorPrimary">@color/purple_200</color> <!-- Пример: используем 200 для темной темы -->
-    <color name="colorPrimaryVariant">@color/purple_700</color>
-    <color name="colorSecondary">@color/teal_200</color>
-    <color name="colorSecondaryVariant">@color/teal_200</color> <!-- Пример: можно использовать тот же -->
-    <color name="colorOnPrimary">@color/on_primary_dark</color>
-    <color name="colorOnSecondary">@color/on_secondary_dark</color>
-    <color name="colorSurface">@color/surface_dark</color>
-    <color name="colorOnSurface">@color/on_surface_dark</color>
-    <color name="colorOnBackground">@color/on_background_dark</color>
+    <!-- Явные цвета для темной темы -->
+    <color name="app_background_dark">#141218</color> <!-- Очень темный фон -->
+    <color name="app_surface_dark">#141218</color>    <!-- Поверхности могут быть такими же или чуть светлее, например #1E1E1E -->
+    <color name="app_text_primary_dark">#E6E0E9</color>  <!-- Светлый текст -->
+    <color name="app_text_secondary_dark">#CAC4D0</color> <!-- Светло-серый текст -->
+    <color name="app_on_primary_dark">#381E72</color> <!-- Темный текст на светлом Primary (если purple_200) -->
+    <color name="app_on_secondary_dark">#003733</color> <!-- Темный текст на светлом Secondary -->
+
+    <!-- Основные цвета темы Material 3 для ТЕМНОЙ темы -->
+    <color name="colorPrimaryDark">@color/purple_200_dark</color>
+    <color name="colorPrimaryVariantDark">@color/purple_700_dark</color> <!-- Используем более темный вариант -->
+    <color name="colorSecondaryDark">@color/teal_200_dark</color>
+    <color name="colorSecondaryVariantDark">@color/teal_700_dark</color> <!-- Используем более светлый вариант -->
+    <color name="colorOnPrimaryDark">@color/app_on_primary_dark</color>
+    <color name="colorOnSecondaryDark">@color/app_on_secondary_dark</color>
+    <color name="colorSurfaceDark">@color/app_surface_dark</color>
+    <color name="colorOnSurfaceDark">@color/app_text_primary_dark</color>
+    <color name="colorBackgroundDark">@color/app_background_dark</color>
+    <color name="colorOnBackgroundDark">@color/app_text_primary_dark</color>
+    <color name="colorErrorDark">#F2B8B5</color> <!-- Светлый красный для ошибки -->
+    <color name="colorOnErrorDark">#601410</color> <!-- Темный текст на ошибке -->
+    <color name="colorOutlineDark">#938F99</color> <!-- Светлый контур -->
 
 </resources>

@@ -1,9 +1,13 @@
 package com.example.budgetapp.ui.transactions
 
+import android.app.Activity // Добавлен импорт Activity
+import android.content.Intent // Добавлен импорт Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.* // Импорт для Menu
+import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts // Добавлен импорт ActivityResultContracts
 import androidx.appcompat.app.AlertDialog // Импорт AlertDialog
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider // Импорт для нового API меню
@@ -15,6 +19,7 @@ import com.example.budgetapp.SharedPreferencesManager
 import com.example.budgetapp.databinding.FragmentTransactionsListBinding
 import com.example.budgetapp.model.Transaction
 import com.example.budgetapp.model.TransactionType
+import com.example.budgetapp.ui.addedit.AddTransactionActivity // Импорт AddTransactionActivity
 import com.google.android.material.chip.Chip // Импорт Chip
 import com.google.android.material.chip.ChipGroup // Импорт ChipGroup
 import java.util.*
@@ -41,6 +46,18 @@ class TransactionsListFragment : Fragment(), MenuProvider { // Реализуе�
     private var currentFilterCategoryIds: Set<String> = emptySet() // Пустое множество - все категории
     private var currentSortMode: SortMode = SortMode.DATE_DESC // Сортировка по умолчанию
 
+    // Лаунчер для запуска AddTransactionActivity и получения результата
+    private val editTransactionLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            Log.d("TransactionsList", "Returned from AddTransactionActivity (Edit) with RESULT_OK")
+            loadAndFilterTransactions() // Обновляем список после редактирования
+        } else {
+            Log.d("TransactionsList", "Returned from AddTransactionActivity (Edit) with result code: ${result.resultCode}")
+        }
+    }
+
     // --- Lifecycle ---
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -59,7 +76,7 @@ class TransactionsListFragment : Fragment(), MenuProvider { // Реализуе�
 
         setupRecyclerView()
         loadAndFilterTransactions() // Загружаем и фильтруем при создании
-        addSampleDataIfNeeded()
+        // addSampleDataIfNeeded() // Убираем добавление сэмплов по умолчанию
     }
 
     // --- MenuProvider Implementation ---
@@ -85,9 +102,8 @@ class TransactionsListFragment : Fragment(), MenuProvider { // Реализуе�
     private fun setupRecyclerView() {
         // Клик на элемент списка теперь используется для редактирования
         transactionAdapter = TransactionAdapter(listOf(), requireContext()) { transaction ->
-            // TODO: Запуск редактирования (если нужно из этого фрагмента)
-            // launchEditTransactionActivity(transaction.id)
-            Toast.makeText(requireContext(), "Клик (редактирование скоро): ${transaction.id}", Toast.LENGTH_SHORT).show()
+            // Запуск редактирования транзакции
+            launchEditTransactionActivity(transaction.id)
         }
 
         binding.recyclerViewTransactions.apply {
@@ -95,6 +111,16 @@ class TransactionsListFragment : Fragment(), MenuProvider { // Реализуе�
             adapter = transactionAdapter
         }
     }
+
+    // Метод для запуска Activity редактирования
+    private fun launchEditTransactionActivity(transactionId: String) {
+        val intent = Intent(requireContext(), AddTransactionActivity::class.java).apply {
+            putExtra(AddTransactionActivity.EXTRA_TRANSACTION_ID, transactionId)
+        }
+        editTransactionLauncher.launch(intent)
+        Log.d("TransactionsList", "Launching AddTransactionActivity for editing ID: $transactionId")
+    }
+
 
     // Основной метод загрузки, фильтрации и сортировки
     private fun loadAndFilterTransactions() {
@@ -148,7 +174,7 @@ class TransactionsListFragment : Fragment(), MenuProvider { // Реализуе�
         val builder = AlertDialog.Builder(requireContext())
         builder.setTitle("Фильтры")
 
-        // Используем кастомный layout для диалога (создадим его позже)
+        // Используем кастомный layout для диалога
         val inflater = requireActivity().layoutInflater
         val dialogView = inflater.inflate(R.layout.dialog_filter_transactions, null)
         builder.setView(dialogView)
@@ -162,7 +188,7 @@ class TransactionsListFragment : Fragment(), MenuProvider { // Реализуе�
         setupCategoryFilterChips(chipGroupCategory)
 
         builder.setPositiveButton("Применить") { _, _ ->
-            // Сохраняем выбранные фильтры из ChipGroup'ов (реализуем позже)
+            // Сохраняем выбранные фильтры из ChipGroup'ов
             updateFiltersFromDialog(chipGroupType, chipGroupCategory)
             applyFiltersAndSort() // Применяем фильтры
         }
@@ -178,6 +204,7 @@ class TransactionsListFragment : Fragment(), MenuProvider { // Реализуе�
     }
 
     private fun setupTypeFilterChips(chipGroup: ChipGroup) {
+        chipGroup.removeAllViews() // Очищаем перед добавлением
         // Добавляем чипы для выбора типа
         val types = mapOf(
             null to "Все", // null соответствует отсутствию фильтра
@@ -189,15 +216,26 @@ class TransactionsListFragment : Fragment(), MenuProvider { // Реализуе�
         chipGroup.isSelectionRequired = true // Хотя бы один должен быть выбран
 
         types.forEach { (type, name) ->
+            val shouldBeCheckedInitially = (currentFilterType == type) // Вычисляем заранее
+
             val chip = Chip(context).apply {
                 text = name
                 isCheckable = true
-                isChecked = (currentFilterType == type) // Отмечаем текущий фильтр
+                // Установка начального состояния isChecked ВНУТРИ apply - это правильно
+                isChecked = shouldBeCheckedInitially
                 tag = type // Сохраняем TransactionType? в теге для легкого доступа
+                id = View.generateViewId() // Генерируем уникальный ID
             }
             chipGroup.addView(chip)
+
+            // Программно выбираем чип в ChipGroup ПОСЛЕ добавления, если он должен быть выбран
+            // Это нужно для singleSelection=true, чтобы ChipGroup знал, какой элемент выбран
+            if (shouldBeCheckedInitially) {
+                chipGroup.check(chip.id) // Используем chipGroup.check()
+            }
         }
     }
+
 
     private fun setupCategoryFilterChips(chipGroup: ChipGroup) {
         chipGroup.removeAllViews() // Очищаем на случай повторного открытия
@@ -205,7 +243,11 @@ class TransactionsListFragment : Fragment(), MenuProvider { // Реализуе�
 
         if (categories.isEmpty()) {
             // Если категорий нет, можно показать сообщение или скрыть ChipGroup
-            // chipGroup.visibility = View.GONE
+            // Например, добавить TextView в dialog_filter_transactions.xml и показать его
+            val noCategoriesTextView = TextView(context).apply {
+                text = "Нет доступных категорий для фильтрации."
+            }
+            chipGroup.addView(noCategoriesTextView)
             return
         }
 
@@ -219,6 +261,7 @@ class TransactionsListFragment : Fragment(), MenuProvider { // Реализуе�
                 // Отмечаем чип, если его ID есть в текущем наборе фильтров
                 isChecked = currentFilterCategoryIds.contains(category.id)
                 tag = category.id // Сохраняем ID категории в теге
+                id = View.generateViewId() // Генерируем уникальный ID
             }
             chipGroup.addView(chip)
         }
@@ -230,8 +273,11 @@ class TransactionsListFragment : Fragment(), MenuProvider { // Реализуе�
         currentFilterType = if (checkedTypeId != View.NO_ID) {
             typeGroup.findViewById<Chip>(checkedTypeId)?.tag as? TransactionType?
         } else {
-            null // На случай, если ничего не выбрано (хотя isSelectionRequired=true)
+            Log.w("TransactionsList", "No chip selected in type group, defaulting to null filter.")
+            null // Если ID не найден (не должно случиться с isSelectionRequired=true)
         }
+        Log.d("TransactionsList", "Selected Type Filter ID: $checkedTypeId, Resolved Type: $currentFilterType")
+
 
         // Обновляем фильтр по категориям
         val selectedCategoryIds = mutableSetOf<String>()
@@ -242,6 +288,7 @@ class TransactionsListFragment : Fragment(), MenuProvider { // Реализуе�
             }
         }
         currentFilterCategoryIds = selectedCategoryIds
+        Log.d("TransactionsList", "Selected Category IDs: $currentFilterCategoryIds")
     }
 
 
@@ -269,7 +316,7 @@ class TransactionsListFragment : Fragment(), MenuProvider { // Реализуе�
                     1 -> SortMode.DATE_ASC
                     2 -> SortMode.AMOUNT_DESC
                     3 -> SortMode.AMOUNT_ASC
-                    else -> SortMode.DATE_DESC
+                    else -> SortMode.DATE_DESC // По умолчанию
                 }
                 applyFiltersAndSort() // Применяем новую сортировку
                 dialog.dismiss() // Закрываем диалог
@@ -279,8 +326,14 @@ class TransactionsListFragment : Fragment(), MenuProvider { // Реализуе�
     }
 
     // --- Остальные методы ---
-    private fun addSampleDataIfNeeded() { /* ... */ }
-    fun refreshTransactions() { Log.d("TransactionsList", "Refreshing..."); loadAndFilterTransactions() } // Обновляем с фильтрами
-    override fun onDestroyView() { super.onDestroyView(); _binding = null }
+    // Метод для публичного вызова обновления из MainActivity
+    fun refreshTransactions() {
+        Log.d("TransactionsList", "External refresh requested.")
+        loadAndFilterTransactions()
+    }
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
     // ----------------------
 }
