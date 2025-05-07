@@ -7,24 +7,21 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import androidx.navigation.fragment.findNavController // Импорт для навигации
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.budgetapp.R
 import com.example.budgetapp.SharedPreferencesManager
 import com.example.budgetapp.databinding.FragmentOverviewBinding
 import com.example.budgetapp.model.Transaction
 import com.example.budgetapp.model.TransactionType
-import com.example.budgetapp.ui.transactions.TransactionAdapter // Импорт адаптера
-import java.text.NumberFormat
+import com.example.budgetapp.ui.transactions.TransactionAdapter
 import java.util.Calendar
-import java.util.Locale
 
 class OverviewFragment : Fragment() {
 
     private var _binding: FragmentOverviewBinding? = null
     private val binding get() = _binding!!
 
-    private val currencyFormatter: NumberFormat by lazy { SharedPreferencesManager.getCurrencyFormatter() }
     // Адаптер для недавних транзакций
     private lateinit var recentTransactionAdapter: TransactionAdapter
 
@@ -49,7 +46,6 @@ class OverviewFragment : Fragment() {
                 findNavController().navigate(R.id.nav_transactions_list)
             } catch (e: Exception) {
                 Log.e("OverviewFragment", "Navigation failed", e)
-                // Можно показать Toast или обработать ошибку иначе
             }
         }
     }
@@ -62,7 +58,7 @@ class OverviewFragment : Fragment() {
     // Настройка RecyclerView для недавних транзакций
     private fun setupRecentTransactionsRecyclerView() {
         // Создаем адаптер. Клик по элементу здесь пока не обрабатываем (пустая лямбда)
-        recentTransactionAdapter = TransactionAdapter(mutableListOf(), requireContext()) { /* No action on click here */ }
+        recentTransactionAdapter = TransactionAdapter(mutableListOf(), requireContext()) { }
 
         binding.recyclerViewRecentTransactions.apply {
             layoutManager = LinearLayoutManager(context)
@@ -76,7 +72,7 @@ class OverviewFragment : Fragment() {
     internal fun loadAndDisplayOverview() {
         Log.d("OverviewFragment", "Loading and displaying overview data...")
         val transactions = SharedPreferencesManager.loadTransactions()
-        val formatter = SharedPreferencesManager.getCurrencyFormatter() // Получаем актуальный форматтер
+        val formatter = SharedPreferencesManager.getCurrencyFormatter() // Получаем актуальный formatter
 
         // --- Общий баланс ---
         val totalBalance = calculateTotalBalance(transactions)

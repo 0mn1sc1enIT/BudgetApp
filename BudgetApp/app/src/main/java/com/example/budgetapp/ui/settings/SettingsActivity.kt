@@ -2,13 +2,11 @@ package com.example.budgetapp.ui.settings
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
 import com.example.budgetapp.R
-import com.example.budgetapp.SharedPreferencesManager
 import com.example.budgetapp.databinding.ActivitySettingsBinding
 
 class SettingsActivity : AppCompatActivity() {
@@ -41,14 +39,14 @@ class SettingsActivity : AppCompatActivity() {
             // Это сдвинет Toolbar вниз, но фон AppBarLayout останется под статус баром
             view.updatePadding(top = insets.top)
 
-            // Возвращаем исходные инсеты, чтобы другие view тоже могли их обработать
+            // Возвращаем исходные insets, чтобы другие view тоже могли их обработать
             windowInsets
         }
     }
 
     // Обработка кнопки "назад" в Toolbar
     override fun onSupportNavigateUp(): Boolean {
-        // Если есть фрагменты в бэкстеке (например, после перехода к DataManagementFragment),
+        // Если есть фрагменты в backstack (например, после перехода к DataManagementFragment),
         // возвращаемся к предыдущему фрагменту. Иначе закрываем Activity.
         if (supportFragmentManager.backStackEntryCount > 0) {
             supportFragmentManager.popBackStack()

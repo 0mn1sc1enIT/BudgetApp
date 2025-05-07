@@ -10,7 +10,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.example.budgetapp.R
-import com.example.budgetapp.databinding.FragmentBalanceTrendBinding // Используем соответствующий binding
+import com.example.budgetapp.databinding.FragmentBalanceTrendBinding
 import com.example.budgetapp.model.Transaction
 import com.example.budgetapp.model.TransactionType
 import com.github.mikephil.charting.components.XAxis
@@ -21,7 +21,6 @@ import com.github.mikephil.charting.formatter.ValueFormatter
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet
 import java.text.SimpleDateFormat
 import java.util.Calendar
-import java.util.Date
 import java.util.Locale
 import java.util.TreeMap
 
@@ -32,8 +31,8 @@ class BalanceTrendFragment : Fragment() {
 
     private val chartsViewModel: ChartsViewModel by activityViewModels()
 
-    // Форматтер для оси X (месяцы)
-    private val monthFormatter = SimpleDateFormat("MMM", Locale("ru")) // "янв", "фев" ...
+    // Formatter для оси X (месяцы)
+    private val monthFormatter = SimpleDateFormat("MMM", Locale("ru"))
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -49,7 +48,6 @@ class BalanceTrendFragment : Fragment() {
 
         chartsViewModel.selectedPeriod.observe(viewLifecycleOwner) { updateChart() }
         chartsViewModel.allTransactions.observe(viewLifecycleOwner) { updateChart() }
-        // Нам не нужны категории для этого графика
     }
 
     private fun setupChart() {
@@ -65,7 +63,7 @@ class BalanceTrendFragment : Fragment() {
             xAxis.position = XAxis.XAxisPosition.BOTTOM
             xAxis.setDrawGridLines(false)
             xAxis.granularity = 1f // Минимальный интервал - 1 (для наших индексов)
-            // Форматтер для оси X установим при наличии данных
+            // Formatter для оси X установим при наличии данных
 
             // Левая ось Y (суммы)
             axisLeft.setDrawGridLines(true) // Можно включить сетку
@@ -165,7 +163,7 @@ class BalanceTrendFragment : Fragment() {
         dataSets.add(balanceDataSet)
         val lineData = LineData(dataSets)
 
-        // Настраиваем форматтер оси X
+        // Настраиваем format оси X
         binding.lineChartBalance.xAxis.valueFormatter = object : ValueFormatter() {
             override fun getFormattedValue(value: Float): String {
                 val index = value.toInt()
@@ -220,7 +218,7 @@ class BalanceTrendFragment : Fragment() {
                 data.expense += transaction.amount
             }
         }
-        // Преобразуем ключи вида YYYYMM в простые индексы 0, 1, 2... для оси X
+        // Преобразуем ключи вида YYYY.MM в простые индексы 0, 1, 2... для оси X
         return aggregatedData.values.mapIndexed { index, data -> index to data }.toMap()
     }
 

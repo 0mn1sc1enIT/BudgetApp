@@ -78,10 +78,10 @@ class MainActivity : AppCompatActivity() {
                     val navOptions = NavOptions.Builder()
                         .setLaunchSingleTop(true)
                         .setPopUpTo(navController.graph.startDestinationId, false) // Возврат к старту перед переходом
-                        .setEnterAnim(androidx.navigation.ui.R.anim.nav_default_enter_anim)
-                        .setExitAnim(androidx.navigation.ui.R.anim.nav_default_exit_anim)
-                        .setPopEnterAnim(androidx.navigation.ui.R.anim.nav_default_pop_enter_anim)
-                        .setPopExitAnim(androidx.navigation.ui.R.anim.nav_default_pop_exit_anim)
+                        .setEnterAnim(android.R.anim.fade_in)
+                        .setExitAnim(android.R.anim.fade_out)
+                        .setPopEnterAnim(android.R.anim.fade_in)
+                        .setPopExitAnim(android.R.anim.fade_out)
                         .build()
                     try {
                         navController.navigate(destinationId, null, navOptions)

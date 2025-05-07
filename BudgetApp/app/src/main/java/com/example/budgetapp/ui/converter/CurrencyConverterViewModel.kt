@@ -5,7 +5,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.budgetapp.network.ExchangeRateResponse
 import com.example.budgetapp.network.NetworkClient
 import kotlinx.coroutines.launch
 
@@ -32,7 +31,6 @@ class CurrencyConverterViewModel : ViewModel() {
 
     // Загрузка курсов остается такой же
     fun fetchRates(apiKey: String, baseCurrency: String = "USD") {
-        // ... (код fetchRates остается БЕЗ ИЗМЕНЕНИЙ) ...
         _isLoading.value = true
         viewModelScope.launch {
             try {

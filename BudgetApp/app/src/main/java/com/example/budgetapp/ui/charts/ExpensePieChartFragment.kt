@@ -7,12 +7,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels // Для доступа к ViewModel родительской Activity/Fragment
-import com.example.budgetapp.R
+import androidx.fragment.app.activityViewModels
 import com.example.budgetapp.SharedPreferencesManager
 import com.example.budgetapp.databinding.FragmentExpensePieChartBinding
-import com.example.budgetapp.model.Category
-import com.example.budgetapp.model.Transaction
 import com.example.budgetapp.model.TransactionType
 import com.github.mikephil.charting.animation.Easing
 import com.github.mikephil.charting.data.PieData
@@ -22,7 +19,6 @@ import com.github.mikephil.charting.formatter.PercentFormatter
 import com.github.mikephil.charting.utils.ColorTemplate
 import com.github.mikephil.charting.utils.MPPointF
 import java.text.NumberFormat
-import java.util.Locale
 
 class ExpensePieChartFragment : Fragment() {
 
@@ -113,10 +109,6 @@ class ExpensePieChartFragment : Fragment() {
 
             // Используем стандартные цвета Material
             dataSet.colors = ColorTemplate.MATERIAL_COLORS.toList()
-            // Или можно добавить больше цветов:
-            // val colors = ArrayList(ColorTemplate.MATERIAL_COLORS.toList())
-            // colors.addAll(ColorTemplate.VORDIPLOM_COLORS.toList())
-            // dataSet.colors = colors
 
             val data = PieData(dataSet)
             data.setValueFormatter(PercentFormatter(binding.pieChartExpenses))
@@ -130,7 +122,7 @@ class ExpensePieChartFragment : Fragment() {
             binding.pieChartExpenses.visibility = View.VISIBLE
             binding.textNoExpenseData.visibility = View.GONE
 
-            // Используем актуальный форматтер для текста в центре
+            // Используем актуальный formatter для текста в центре
             val totalAmount = expensesByCategory.values.sum() // или incomeByCategory
             binding.pieChartExpenses.centerText = "Расходы\n${formatter.format(totalAmount)}" // или "Доходы..." для Income фрагмента
 

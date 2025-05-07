@@ -1,11 +1,12 @@
 package com.example.budgetapp.ui.categories
 
+import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
-import com.example.budgetapp.R // Убедись, что R импортирован
-import com.example.budgetapp.databinding.ItemCategoryBinding // Убедись, что ViewBinding включен
+import com.example.budgetapp.R
+import com.example.budgetapp.databinding.ItemCategoryBinding
 import com.example.budgetapp.model.Category
 import com.example.budgetapp.model.TransactionType
 
@@ -27,6 +28,7 @@ class CategoryAdapter(
     override fun getItemCount(): Int = categories.size
 
     // Метод для обновления данных в адаптере
+    @SuppressLint("NotifyDataSetChanged")
     fun updateData(newCategories: List<Category>) {
         categories.clear()
         categories.addAll(newCategories)
@@ -65,7 +67,6 @@ class CategoryAdapter(
             }
             binding.root.setOnLongClickListener {
                 onCategoryLongClick(category)
-                // onLongClick должен возвращать Boolean, передаем результат из лямбды
             }
         }
     }

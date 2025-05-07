@@ -53,8 +53,7 @@ class DataManagementFragment : Fragment() {
             Toast.makeText(requireContext(), "Все данные успешно удалены", Toast.LENGTH_LONG).show()
             // Возвращаемся на предыдущий экран (SettingsMainFragment)
             parentFragmentManager.popBackStack()
-            // Можно добавить перезапуск приложения или обновление данных во всех экранах,
-            // но пока ограничимся возвратом.
+
         } catch (e: Exception) {
             Toast.makeText(requireContext(), "Ошибка при очистке данных: ${e.message}", Toast.LENGTH_LONG).show()
             e.printStackTrace()

@@ -1,32 +1,25 @@
-package com.example.budgetapp.network // или другой пакет
+package com.example.budgetapp.network
 
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
-import com.github.mikephil.charting.BuildConfig
 
 object NetworkClient {
 
     // Базовый URL API
-    private const val BASE_URL = "https://v6.exchangerate-api.com/" // Убедись, что URL правильный
+    private const val BASE_URL = "https://v6.exchangerate-api.com/"
 
-    // Создаем логгер для OkHttp
+    // Создаем logger для OkHttp
     private val loggingInterceptor = HttpLoggingInterceptor().apply {
         // Устанавливаем уровень логирования:
-        // В DEBUG сборках показываем всё тело запроса/ответа,
-        // в релизных сборках - лучше отключить (NONE) или оставить BASIC.
-        level = if (BuildConfig.DEBUG) {
-            HttpLoggingInterceptor.Level.BODY
-        } else {
-            HttpLoggingInterceptor.Level.NONE
-        }
+        level = HttpLoggingInterceptor.Level.NONE
     }
 
-    // Создаем OkHttp клиент с логгером и таймаутами
+    // Создаем OkHttp клиент с logger и таймаутами
     private val okHttpClient: OkHttpClient = OkHttpClient.Builder()
-        .addInterceptor(loggingInterceptor) // Добавляем логгер
+        .addInterceptor(loggingInterceptor) // Добавляем logger
         .connectTimeout(30, TimeUnit.SECONDS) // Таймаут соединения
         .readTimeout(30, TimeUnit.SECONDS)    // Таймаут чтения
         .writeTimeout(30, TimeUnit.SECONDS)   // Таймаут записи

@@ -10,7 +10,6 @@ import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.example.budgetapp.R
 import com.example.budgetapp.SharedPreferencesManager
@@ -20,7 +19,6 @@ import com.example.budgetapp.model.Transaction
 import com.example.budgetapp.model.TransactionType
 import java.text.SimpleDateFormat
 import java.util.*
-import java.util.concurrent.TimeUnit // Для работы с датой, если понадобится
 
 class AddTransactionFormFragment : Fragment() {
 
@@ -39,7 +37,6 @@ class AddTransactionFormFragment : Fragment() {
     private var transactionIdToEdit: String? = null
     private var transactionToEdit: Transaction? = null // Храним загруженную транзакцию
 
-    // --- Companion object и newInstance для передачи аргументов ---
     companion object {
         private const val ARG_TRANSACTION_ID = "transaction_id"
 
@@ -52,7 +49,6 @@ class AddTransactionFormFragment : Fragment() {
             return fragment
         }
     }
-    // ------------------------------------------------------------
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -82,7 +78,7 @@ class AddTransactionFormFragment : Fragment() {
         if (transactionIdToEdit != null && transactionToEdit == null) {
             // Если ID есть, но транзакция еще не загружена (например, после поворота)
             loadTransactionDataAndPopulateForm()
-        } else if (transactionIdToEdit != null && transactionToEdit != null) {
+        } else if (transactionIdToEdit != null) {
             // Транзакция уже была загружена ранее (например, до поворота)
             // Просто заполняем форму еще раз, чтобы восстановить состояние UI
             populateFormWithExistingData()
@@ -155,8 +151,6 @@ class AddTransactionFormFragment : Fragment() {
             calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth)
             updateDateInView()
         }
-        binding.editTextDate.setOnClickListener { /*...*/ } // Код без изменений
-        binding.inputLayoutDate.setOnClickListener { /*...*/ } // Код без изменений
         binding.editTextDate.setOnClickListener {
             DatePickerDialog(
                 requireContext(),
@@ -199,7 +193,7 @@ class AddTransactionFormFragment : Fragment() {
         binding.radioGroupTransactionType.setOnCheckedChangeListener { _, checkedId ->
             val selectedType = if (checkedId == R.id.radio_income) TransactionType.INCOME else TransactionType.EXPENSE
             Log.d("AddTransactionForm", "Transaction type changed to: $selectedType")
-            // Перезагружаем категории и сбрасываем выбор в спиннере,
+            // Перезагружаем категории и сбрасываем выбор в spinner,
             // так как старая категория может быть невалидна для нового типа
             loadCategoriesForType(selectedType) {
                 // После загрузки нового списка категорий, если он не пуст, выбираем первую
@@ -213,7 +207,7 @@ class AddTransactionFormFragment : Fragment() {
         }
     }
 
-    // Обновленная версия loadCategoriesForType с колбэком
+    // Обновленная версия loadCategoriesForType с callback
     private fun loadCategoriesForType(type: TransactionType, onLoaded: (() -> Unit)? = null) {
         Log.d("AddTransactionForm", "Loading categories for type: $type")
         categoriesForSpinner = SharedPreferencesManager.getCategoriesByType(type)
@@ -222,8 +216,8 @@ class AddTransactionFormFragment : Fragment() {
         categoryAdapter.clear()
         if (categoryNames.isNotEmpty()) {
             categoryAdapter.addAll(categoryNames)
-            binding.spinnerCategory.isEnabled = true // Включаем спиннер
-            // Вызываем колбэк после обновления данных адаптера
+            binding.spinnerCategory.isEnabled = true // Включаем спиннер.
+            // Вызываем callback после обновления данных адаптера.
             // Запускаем через post, чтобы дать время адаптеру обновиться
             binding.spinnerCategory.post {
                 // Выбираем первую категорию по умолчанию, если не режим редактирования
@@ -232,14 +226,14 @@ class AddTransactionFormFragment : Fragment() {
                     // Вызываем onItemSelected вручную, чтобы selectedCategory установился
                     binding.spinnerCategory.onItemSelectedListener?.onItemSelected(binding.spinnerCategory, null, 0, 0)
                 }
-                onLoaded?.invoke() // Вызываем внешний колбэк
+                onLoaded?.invoke() // Вызываем внешний callback
                 Log.d("AddTransactionForm", "Categories loaded. Executing onLoaded callback.")
             }
         } else {
             categoryAdapter.add("Нет категорий")
             binding.spinnerCategory.isEnabled = false // Отключаем спиннер
             selectedCategory = null
-            // Вызываем колбэк даже если категорий нет
+            // Вызываем callback даже если категорий нет
             binding.spinnerCategory.post {
                 onLoaded?.invoke()
                 Log.d("AddTransactionForm", "No categories found. Executing onLoaded callback.")
@@ -248,7 +242,7 @@ class AddTransactionFormFragment : Fragment() {
         categoryAdapter.notifyDataSetChanged()
     }
 
-    // Обновленный метод сохранения
+    // Метод сохранения
     fun saveTransaction() {
         // 1. Валидация суммы
         val amountStr = binding.editTextAmount.text.toString()

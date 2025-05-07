@@ -1,5 +1,6 @@
 package com.example.budgetapp.ui.transactions
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -21,10 +22,8 @@ class TransactionAdapter(
     private val onItemClick: (Transaction) -> Unit
 ) : RecyclerView.Adapter<TransactionAdapter.TransactionViewHolder>() {
 
-    // Форматтер для даты
+    // Formatter для даты
     private val dateFormat = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
-
-    private fun getFormatter(): NumberFormat = SharedPreferencesManager.getCurrencyFormatter()
 
     // Кэш для загруженных категорий, чтобы не дергать SharedPreferences для каждого элемента
     private var categoriesMap: Map<String, Category> = mapOf()
@@ -54,6 +53,7 @@ class TransactionAdapter(
     override fun getItemCount(): Int = transactions.size
 
     // Обновляем данные и кэш категорий
+    @SuppressLint("NotifyDataSetChanged")
     fun updateData(newTransactions: List<Transaction>) {
         transactions = newTransactions
         reloadCategoriesCache() // Обновляем кэш категорий на случай их изменения
@@ -98,7 +98,7 @@ class TransactionAdapter(
         // Обновляем formatAmount для добавления знака +/-
         private fun formatAmount(amount: Double, type: TransactionType, formatter: NumberFormat): String {
             val sign = if (type == TransactionType.EXPENSE) "-" else "+"
-            val formattedAmount = formatter.format(kotlin.math.abs(amount)) // Используем переданный форматтер
+            val formattedAmount = formatter.format(kotlin.math.abs(amount)) // Используем переданный formatter
             return "$sign $formattedAmount"
         }
     }

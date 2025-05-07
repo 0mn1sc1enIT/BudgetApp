@@ -6,9 +6,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels // Делегат для ViewModel
+import androidx.fragment.app.viewModels
 import androidx.viewpager2.adapter.FragmentStateAdapter
-import com.example.budgetapp.R
 import com.example.budgetapp.databinding.FragmentChartsBinding
 import com.example.budgetapp.model.ChartPeriod
 import com.google.android.material.tabs.TabLayoutMediator
@@ -37,7 +36,7 @@ class ChartsFragment : Fragment() {
     }
 
     private fun setupPeriodSpinner() {
-        val periods = ChartPeriod.values().map { it.displayName }
+        val periods = ChartPeriod.entries.map { it.displayName }
         val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, periods) // Используем стандартный layout
         binding.spinnerPeriodSelector.setAdapter(adapter)
 
@@ -48,7 +47,7 @@ class ChartsFragment : Fragment() {
         // Слушатель выбора
         binding.spinnerPeriodSelector.setOnItemClickListener { parent, _, position, _ ->
             val selectedPeriodName = parent.adapter.getItem(position) as String
-            ChartPeriod.values().find { it.displayName == selectedPeriodName }?.let {
+            ChartPeriod.entries.find { it.displayName == selectedPeriodName }?.let {
                 chartsViewModel.selectPeriod(it) // Обновляем ViewModel
             }
         }

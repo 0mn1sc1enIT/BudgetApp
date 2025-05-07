@@ -12,8 +12,7 @@ data class Transaction(
     val id: String = UUID.randomUUID().toString(),
     val amount: Double,
     val type: TransactionType,
-    // val category: String, // <-- Удаляем эту строку
-    val categoryId: String,   // <-- Добавляем ID категории
+    val categoryId: String,
     val description: String?,
     val date: Date = Date()
 )

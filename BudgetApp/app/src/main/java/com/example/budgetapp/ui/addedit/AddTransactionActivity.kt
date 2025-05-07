@@ -1,6 +1,5 @@
 package com.example.budgetapp.ui.addedit
 
-import android.app.Activity
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -12,13 +11,10 @@ import androidx.core.view.updatePadding
 import com.example.budgetapp.R
 import com.example.budgetapp.SharedPreferencesManager
 import com.example.budgetapp.databinding.ActivityAddTransactionBinding
-import com.example.budgetapp.model.Transaction // Убедись, что импорт Transaction есть
 
 class AddTransactionActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityAddTransactionBinding
-    // Убираем прямое хранение ссылки на фрагмент здесь
-    // private lateinit var formFragment: AddTransactionFormFragment
 
     companion object {
         // Ключ для передачи ID транзакции на редактирование
@@ -39,7 +35,7 @@ class AddTransactionActivity : AppCompatActivity() {
         var isEditMode = false // Флаг режима
 
         if (transactionIdToEdit != null) {
-            // Проверяем, существует ли транзакция (на всякий случай)
+            // Проверяем, существует ли транзакция
             val transactionExists = SharedPreferencesManager.loadTransactions()
                 .any { it.id == transactionIdToEdit }
             if (transactionExists) {
@@ -51,7 +47,7 @@ class AddTransactionActivity : AppCompatActivity() {
                 // Ошибка - транзакция не найдена
                 Log.e("AddTransactionActivity", "Transaction with ID $transactionIdToEdit not found in storage!")
                 Toast.makeText(this, "Ошибка: Транзакция не найдена", Toast.LENGTH_LONG).show()
-                setResult(Activity.RESULT_CANCELED) // Устанавливаем результат отмены
+                setResult(RESULT_CANCELED) // Устанавливаем результат отмены
                 finish() // Закрываем Activity
                 return // Прерываем onCreate
             }
@@ -61,7 +57,7 @@ class AddTransactionActivity : AppCompatActivity() {
             supportActionBar?.title = "Добавить транзакцию"
         }
 
-        // Добавляем фрагмент формы, если он еще не добавлен
+        // Добавляем фрагмент формы, если он еще не добавлен.
         // Передаем ID транзакции (или null) в аргументы фрагмента
         if (savedInstanceState == null) {
             val fragmentToShow = AddTransactionFormFragment.newInstance(transactionIdToEdit)
@@ -70,8 +66,7 @@ class AddTransactionActivity : AppCompatActivity() {
                 .commitNow() // Используем commitNow для синхронности, если нужно сразу работать с фрагментом
         }
 
-        val appBarLayout = binding.appBarLayoutAdd // Получите ваш AppBarLayout по ID из binding
-// ИЛИ val appBarLayout = findViewById<AppBarLayout>(R.id.app_bar_layout_settings)
+        val appBarLayout = binding.appBarLayoutAdd // Получите AppBarLayout по ID из binding
 
         ViewCompat.setOnApplyWindowInsetsListener(appBarLayout) { view, windowInsets ->
             val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -80,16 +75,15 @@ class AddTransactionActivity : AppCompatActivity() {
             // Это сдвинет Toolbar вниз, но фон AppBarLayout останется под статус баром
             view.updatePadding(top = insets.top)
 
-            // Возвращаем исходные инсеты, чтобы другие view тоже могли их обработать
+            // Возвращаем исходные insets, чтобы другие view тоже могли их обработать
             windowInsets
         }
-        // Если savedInstanceState != null, система сама восстановит фрагмент с его аргументами
     }
 
     // Обработка нажатия кнопки "назад" в Toolbar
     override fun onSupportNavigateUp(): Boolean {
         // Устанавливаем результат CANCELLED, если пользователь ушел кнопкой назад
-        setResult(Activity.RESULT_CANCELED)
+        setResult(RESULT_CANCELED)
         finish()
         return true
     }
@@ -97,7 +91,7 @@ class AddTransactionActivity : AppCompatActivity() {
     // Обработка системной кнопки "назад"
     @Deprecated("This method has been deprecated in favor of using the OnBackPressedDispatcher")
     override fun onBackPressed() {
-        setResult(Activity.RESULT_CANCELED)
+        setResult(RESULT_CANCELED)
         super.onBackPressed()
     }
 }

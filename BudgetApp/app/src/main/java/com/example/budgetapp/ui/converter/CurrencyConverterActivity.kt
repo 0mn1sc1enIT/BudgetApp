@@ -27,7 +27,7 @@ class CurrencyConverterActivity : AppCompatActivity() {
 
     // Используем тот же список валют
     private val currencies = listOf("KZT", "USD", "EUR", "RUB")
-    // Форматтер для отображения результатов
+    // Formatter для отображения результатов
     private val resultFormatter: NumberFormat = NumberFormat.getNumberInstance(Locale.getDefault()).apply {
         maximumFractionDigits = 2
         minimumFractionDigits = 2
@@ -73,7 +73,7 @@ class CurrencyConverterActivity : AppCompatActivity() {
             // Это сдвинет Toolbar вниз, но фон AppBarLayout останется под статус баром
             view.updatePadding(top = insets.top)
 
-            // Возвращаем исходные инсеты, чтобы другие view тоже могли их обработать
+            // Возвращаем исходные insets, чтобы другие view тоже могли их обработать
             windowInsets
         }
     }
@@ -85,7 +85,6 @@ class CurrencyConverterActivity : AppCompatActivity() {
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
 
         binding.spinnerFromCurrency.adapter = adapter
-        // УБИРАЕМ настройку второго спиннера
 
         binding.spinnerFromCurrency.setSelection(currencies.indexOf("KZT")) // KZT по умолчанию
 

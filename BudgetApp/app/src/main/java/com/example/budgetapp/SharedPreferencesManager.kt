@@ -3,7 +3,6 @@ package com.example.budgetapp
 import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
-import androidx.appcompat.app.AppCompatDelegate
 import com.example.budgetapp.model.Category
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -12,10 +11,11 @@ import com.example.budgetapp.model.TransactionType
 import java.text.NumberFormat
 import java.util.Currency
 import java.util.Locale
+import androidx.core.content.edit
 
 object SharedPreferencesManager {
 
-    private const val PREFS_NAME = "MyBudgetPrefs" // Имя файла SharedPreferences
+    private const val PREFS_NAME = "MyBudgetPrefs"
     private const val KEY_TRANSACTIONS = "transactions_list" // Ключ для хранения списка транзакций
     private const val KEY_CATEGORIES = "categories_list"
     private const val KEY_CURRENCY_SYMBOL = "currency_symbol"
@@ -35,7 +35,7 @@ object SharedPreferencesManager {
     fun saveTransactions(transactions: List<Transaction>) {
         checkInitialized() // Проверка, что init был вызван
         val jsonTransactions = gson.toJson(transactions) // Конвертируем список в JSON строку
-        sharedPreferences.edit().putString(KEY_TRANSACTIONS, jsonTransactions).apply() // Сохраняем строку
+        sharedPreferences.edit { putString(KEY_TRANSACTIONS, jsonTransactions) } // Сохраняем строку
     }
 
     // Метод для загрузки списка транзакций
@@ -54,9 +54,6 @@ object SharedPreferencesManager {
             return gson.fromJson(jsonTransactions, type) ?: mutableListOf() // Десериализуем и возвращаем, или пустой список если ошибка
         } catch (e: Exception) {
             Log.e("SharedPreferencesManager", "Error parsing transactions JSON", e)
-            // Ошибка парсинга, возвращаем пустой список, чтобы не крашить приложение
-            // и опционально чистим некорректные данные
-            // clearAllTransactions() // Раскомментировать, если хотите очищать при ошибке
             return mutableListOf()
         }
     }
@@ -65,13 +62,6 @@ object SharedPreferencesManager {
     fun addTransaction(transaction: Transaction) {
         val currentTransactions = loadTransactions()
         currentTransactions.add(transaction)
-        saveTransactions(currentTransactions)
-    }
-
-    // Метод для удаления транзакции (по ID, например)
-    fun deleteTransaction(transactionId: String) {
-        val currentTransactions = loadTransactions()
-        currentTransactions.removeAll { it.id == transactionId } // Удаляем транзакцию с совпадающим ID
         saveTransactions(currentTransactions)
     }
 
@@ -98,14 +88,14 @@ object SharedPreferencesManager {
     // Можно добавить методы для очистки данных, если нужно
     fun clearAllTransactions() {
         checkInitialized()
-        sharedPreferences.edit().remove(KEY_TRANSACTIONS).apply()
+        sharedPreferences.edit { remove(KEY_TRANSACTIONS) }
     }
 
     // Сохранение списка категорий
     fun saveCategories(categories: List<Category>) {
         checkInitialized()
         val jsonCategories = gson.toJson(categories)
-        sharedPreferences.edit().putString(KEY_CATEGORIES, jsonCategories).apply()
+        sharedPreferences.edit { putString(KEY_CATEGORIES, jsonCategories) }
     }
 
     // Загрузка списка категорий
@@ -196,14 +186,14 @@ object SharedPreferencesManager {
     // Метод для очистки ВСЕХ данных (транзакций и категорий)
     fun clearAllData() {
         checkInitialized()
-        sharedPreferences.edit().clear().apply() // Очищает ВСЕ данные в этом файле SharedPreferences
+        sharedPreferences.edit { clear() } // Очищает ВСЕ данные в этом файле SharedPreferences
         Log.i("SharedPreferencesManager", "All data cleared.")
     }
 
     // Метод для сохранения символа валюты
     fun saveCurrencySymbol(symbol: String) {
         checkInitialized()
-        sharedPreferences.edit().putString(KEY_CURRENCY_SYMBOL, symbol).apply()
+        sharedPreferences.edit { putString(KEY_CURRENCY_SYMBOL, symbol) }
     }
 
     // Метод для загрузки символа валюты
@@ -217,7 +207,7 @@ object SharedPreferencesManager {
     // Новый метод для сохранения настройки темы (boolean)
     fun saveDarkModeEnabled(isDarkMode: Boolean) {
         checkInitialized()
-        sharedPreferences.edit().putBoolean(KEY_DARK_MODE_ENABLED, isDarkMode).apply()
+        sharedPreferences.edit { putBoolean(KEY_DARK_MODE_ENABLED, isDarkMode) }
     }
 
     // Новый метод для загрузки настройки темы (boolean)
@@ -236,11 +226,7 @@ object SharedPreferencesManager {
 
         // Пытаемся установить символ валюты
         try {
-            // NumberFormat использует java.util.Currency. Нам нужно создать
-            // фиктивный объект Currency с нужным символом.
-            // Это может не всегда работать идеально для всех символов/локалей,
-            // но для основных (₽, $, €) должно быть нормально.
-            val currency = Currency.getInstance(Locale.getDefault()) // Берем текущую локаль для кода
+            Currency.getInstance(Locale.getDefault()) // Берем текущую локаль для кода
             val decimalFormatSymbols = (formatter as? java.text.DecimalFormat)?.decimalFormatSymbols ?: java.text.DecimalFormatSymbols.getInstance()
             decimalFormatSymbols.currencySymbol = savedSymbol // Устанавливаем наш символ
             (formatter as? java.text.DecimalFormat)?.decimalFormatSymbols = decimalFormatSymbols
@@ -254,5 +240,18 @@ object SharedPreferencesManager {
         }
 
         return formatter
+    }
+
+    fun updateCategory(updatedCategory: Category) {
+        checkInitialized()
+        val currentCategories = loadCategories()
+        val index = currentCategories.indexOfFirst { it.id == updatedCategory.id }
+        if (index != -1) {
+            currentCategories[index] = updatedCategory
+            saveCategories(currentCategories)
+            Log.d("SharedPreferencesManager", "Category updated: ${updatedCategory.id}")
+        } else {
+            Log.w("SharedPreferencesManager", "Category with ID ${updatedCategory.id} not found for update.")
+        }
     }
 }

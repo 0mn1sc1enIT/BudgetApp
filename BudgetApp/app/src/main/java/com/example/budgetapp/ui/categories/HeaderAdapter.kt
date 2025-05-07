@@ -3,7 +3,7 @@ package com.example.budgetapp.ui.categories
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.example.budgetapp.databinding.ItemCategoryHeaderBinding // Используем ViewBinding
+import com.example.budgetapp.databinding.ItemCategoryHeaderBinding
 
 class HeaderAdapter(private val title: String) : RecyclerView.Adapter<HeaderAdapter.HeaderViewHolder>() {
 

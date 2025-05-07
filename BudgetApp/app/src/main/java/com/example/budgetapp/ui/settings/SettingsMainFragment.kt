@@ -7,7 +7,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
-import android.widget.RadioGroup
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.fragment.app.Fragment
 import com.example.budgetapp.R
@@ -56,7 +55,7 @@ class SettingsMainFragment : Fragment() {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 val selectedSymbol = currencySymbols[position]
                 SharedPreferencesManager.saveCurrencySymbol(selectedSymbol)
-                // Обновление форматтера не требуется немедленно, он будет пересоздан при след. использовании
+                // Обновление formatter не требуется немедленно, он будет пересоздан при следующем использовании
             }
             override fun onNothingSelected(parent: AdapterView<*>?) {}
         }

@@ -1,126 +1,126 @@
 package com.example.budgetapp.ui.categories
 
-import android.app.Activity
-import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog // Импорт для диалога
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
-import androidx.recyclerview.widget.ConcatAdapter // Импорт ConcatAdapter
+import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.budgetapp.R // Убедись, что R импортирован
+import com.example.budgetapp.R
 import com.example.budgetapp.SharedPreferencesManager
 import com.example.budgetapp.databinding.FragmentCategoryListBinding
 import com.example.budgetapp.model.Category
-import com.example.budgetapp.model.TransactionType // Импорт TransactionType
+import com.example.budgetapp.model.TransactionType
 
 class CategoryListFragment : Fragment() {
 
     private var _binding: FragmentCategoryListBinding? = null
     private val binding get() = _binding!!
 
-    // Адаптеры для каждой секции
     private lateinit var incomeHeaderAdapter: HeaderAdapter
     private lateinit var incomeCategoryAdapter: CategoryAdapter
     private lateinit var expenseHeaderAdapter: HeaderAdapter
     private lateinit var expenseCategoryAdapter: CategoryAdapter
+    private lateinit var concatAdapter: ConcatAdapter
 
-    private lateinit var concatAdapter: ConcatAdapter // Главный адаптер
+    companion object {
+        // Используем тот же ключ для добавления и редактирования
+        const val ADD_EDIT_CATEGORY_REQUEST_KEY = "addEditCategoryRequest"
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentCategoryListBinding.inflate(inflater, container, false)
+        setupResultListener()
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        setupAdapters() // Инициализируем адаптеры
+        setupAdapters()
         setupRecyclerView()
-        loadCategories() // Загружаем и разделяем категории
+        loadCategories()
 
         binding.fabAddCategory.setOnClickListener {
-            showAddCategoryDialog()
+            showAddCategoryDialog() // Вызываем старый метод для добавления
+        }
+    }
+
+    private fun setupResultListener() {
+        parentFragmentManager.setFragmentResultListener(
+            ADD_EDIT_CATEGORY_REQUEST_KEY, // Слушаем общий ключ
+            viewLifecycleOwner
+        ) { requestKey, bundle ->
+            if (requestKey == ADD_EDIT_CATEGORY_REQUEST_KEY) {
+                val success = bundle.getBoolean(AddCategoryFragment.RESULT_KEY_SUCCESS, false)
+                if (success) {
+                    val isEdit = bundle.getBoolean(AddCategoryFragment.RESULT_KEY_IS_EDIT, false)
+                    val message = if (isEdit) "Категория обновлена!" else "Категория добавлена!"
+                    loadCategories() // Перезагружаем список в обоих случаях
+                    Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+                }
+            }
         }
     }
 
     override fun onResume() {
         super.onResume()
-        // Перезагружаем при возвращении, так как категории могли измениться
         loadCategories()
     }
 
-    // Инициализация всех адаптеров
     private fun setupAdapters() {
+        // Обновляем onCategoryClickAction для запуска редактирования
         val onCategoryClickAction = { category: Category ->
-            // TODO: Обработка клика (например, переход к редактированию) - Оставляем Toast
-            Toast.makeText(requireContext(), "Клик: ${category.name}", Toast.LENGTH_SHORT).show()
+            Log.d("CategoryListFragment", "Short click on category: ${category.name}, ID: ${category.id}")
+            showEditCategoryDialog(category.id) // Вызываем метод для редактирования
         }
         val onCategoryLongClickAction = { category: Category ->
-            // Показываем диалог подтверждения удаления
             showDeleteCategoryConfirmationDialog(category)
-            true // Возвращаем true, т.к. событие обработано (диалог показан)
+            true
         }
 
-        // Создаем адаптеры заголовков
-        incomeHeaderAdapter = HeaderAdapter(getString(R.string.income_categories_header)) // Используем строку из ресурсов
-        expenseHeaderAdapter = HeaderAdapter(getString(R.string.expense_categories_header)) // Используем строку из ресурсов
-
-        // Создаем адаптеры для списков категорий (пока с пустыми списками)
+        // ... (создание адаптеров без изменений) ...
+        incomeHeaderAdapter = HeaderAdapter(getString(R.string.income_categories_header))
+        expenseHeaderAdapter = HeaderAdapter(getString(R.string.expense_categories_header))
         incomeCategoryAdapter = CategoryAdapter(mutableListOf(), onCategoryClickAction, onCategoryLongClickAction)
         expenseCategoryAdapter = CategoryAdapter(mutableListOf(), onCategoryClickAction, onCategoryLongClickAction)
-
-        // Создаем ConcatAdapter (пока пустой, добавим адаптеры в loadCategories)
         concatAdapter = ConcatAdapter()
     }
 
     private fun setupRecyclerView() {
         binding.recyclerViewCategories.apply {
             layoutManager = LinearLayoutManager(context)
-            // Устанавливаем ConcatAdapter
             adapter = concatAdapter
         }
     }
 
     private fun loadCategories() {
-        // 1. Загружаем все категории
         val allCategories = SharedPreferencesManager.loadCategories()
-
-        // 2. Разделяем на доходы и расходы
         val incomeCategories = allCategories.filter { it.type == TransactionType.INCOME }
         val expenseCategories = allCategories.filter { it.type == TransactionType.EXPENSE }
 
-        // 3. Обновляем данные в адаптерах категорий
         incomeCategoryAdapter.updateData(incomeCategories)
         expenseCategoryAdapter.updateData(expenseCategories)
 
-        // 4. Пересобираем ConcatAdapter в зависимости от наличия данных
-        // Сначала удаляем все предыдущие адаптеры
         concatAdapter.adapters.forEach { concatAdapter.removeAdapter(it) }
 
-        // Добавляем секцию доходов, если есть категории
         if (incomeCategories.isNotEmpty()) {
             concatAdapter.addAdapter(incomeHeaderAdapter)
             concatAdapter.addAdapter(incomeCategoryAdapter)
         }
-
-        // Добавляем секцию расходов, если есть категории
         if (expenseCategories.isNotEmpty()) {
             concatAdapter.addAdapter(expenseHeaderAdapter)
             concatAdapter.addAdapter(expenseCategoryAdapter)
         }
-
-        // 5. Обновляем видимость текста "Список пуст"
         updateEmptyView(allCategories.isEmpty())
     }
 
-    // Теперь принимает Boolean (true, если список ПОЛНОСТЬЮ пуст)
     private fun updateEmptyView(isEmpty: Boolean) {
         if (isEmpty) {
             binding.textEmptyCategories.visibility = View.VISIBLE
@@ -131,13 +131,21 @@ class CategoryListFragment : Fragment() {
         }
     }
 
+    // Метод для показа диалога добавления (FAB)
     private fun showAddCategoryDialog() {
-        val dialogFragment = AddCategoryFragment()
-        dialogFragment.setTargetFragment(this, ADD_CATEGORY_REQUEST_CODE)
+        // Вызываем newInstance без ID для режима добавления
+        val dialogFragment = AddCategoryFragment.newInstance(null)
         dialogFragment.show(parentFragmentManager, "AddCategoryDialog")
     }
 
-    // Диалог подтверждения удаления категории
+    // Новый метод для показа диалога редактирования (по клику)
+    private fun showEditCategoryDialog(categoryId: String) {
+        // Вызываем newInstance с ID для режима редактирования
+        val dialogFragment = AddCategoryFragment.newInstance(categoryId)
+        dialogFragment.show(parentFragmentManager, "EditCategoryDialog") // Можно использовать другой тег
+    }
+
+
     private fun showDeleteCategoryConfirmationDialog(category: Category) {
         AlertDialog.Builder(requireContext())
             .setTitle("Удалить категорию?")
@@ -150,24 +158,14 @@ class CategoryListFragment : Fragment() {
             .show()
     }
 
-    // Логика удаления категории
     private fun deleteCategory(category: Category) {
         try {
             SharedPreferencesManager.deleteCategory(category.id)
             Toast.makeText(requireContext(), "Категория \"${category.name}\" удалена", Toast.LENGTH_SHORT).show()
-            loadCategories() // Перезагружаем список для обновления UI
+            loadCategories()
         } catch (e: Exception) {
             Toast.makeText(requireContext(), "Ошибка при удалении категории: ${e.message}", Toast.LENGTH_LONG).show()
             e.printStackTrace()
-        }
-    }
-
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == ADD_CATEGORY_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
-            loadCategories() // Перезагружаем, чтобы обновить обе секции
-            Toast.makeText(requireContext(), "Категория добавлена!", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -176,7 +174,4 @@ class CategoryListFragment : Fragment() {
         _binding = null
     }
 
-    companion object {
-        const val ADD_CATEGORY_REQUEST_CODE = 101
-    }
 }

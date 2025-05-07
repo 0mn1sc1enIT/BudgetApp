@@ -3,15 +3,12 @@ package com.example.budgetapp.ui.categories
 import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
-import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.view.GravityCompat
 import androidx.core.view.WindowCompat
 import com.example.budgetapp.MainActivity
 import com.example.budgetapp.R
-import com.example.budgetapp.SharedPreferencesManager
 import com.example.budgetapp.databinding.ActivityCategoriesBinding
 import com.example.budgetapp.ui.converter.CurrencyConverterActivity
 import com.example.budgetapp.ui.settings.SettingsActivity
@@ -75,9 +72,6 @@ class CategoriesActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
                 intent.putExtra(EXTRA_DESTINATION_ID, destinationId)
                 startActivity(intent)
                 finish()
-            }
-            R.id.nav_categories -> {
-                // Уже здесь
             }
             R.id.nav_settings -> {
                 val intent = Intent(this, SettingsActivity::class.java) // Создаем Intent для SettingsActivity

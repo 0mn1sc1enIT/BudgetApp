@@ -1,16 +1,15 @@
 package com.example.budgetapp.ui.transactions
 
-import android.app.Activity // Добавлен импорт Activity
-import android.content.Intent // Добавлен импорт Intent
+import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import android.view.* // Импорт для Menu
+import android.view.*
 import android.widget.TextView
-import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts // Добавлен импорт ActivityResultContracts
-import androidx.appcompat.app.AlertDialog // Импорт AlertDialog
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.core.view.MenuHost
-import androidx.core.view.MenuProvider // Импорт для нового API меню
+import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -19,11 +18,10 @@ import com.example.budgetapp.SharedPreferencesManager
 import com.example.budgetapp.databinding.FragmentTransactionsListBinding
 import com.example.budgetapp.model.Transaction
 import com.example.budgetapp.model.TransactionType
-import com.example.budgetapp.ui.addedit.AddTransactionActivity // Импорт AddTransactionActivity
-import com.google.android.material.chip.Chip // Импорт Chip
-import com.google.android.material.chip.ChipGroup // Импорт ChipGroup
-import java.util.*
-import kotlin.Comparator // Для сортировки
+import com.example.budgetapp.ui.addedit.AddTransactionActivity
+import com.google.android.material.chip.Chip
+import com.google.android.material.chip.ChipGroup
+import kotlin.Comparator
 
 // Enum для режимов сортировки
 enum class SortMode {
@@ -33,7 +31,7 @@ enum class SortMode {
     AMOUNT_ASC   // По сумме (возрастание)
 }
 
-class TransactionsListFragment : Fragment(), MenuProvider { // Реализуем MenuProvider
+class TransactionsListFragment : Fragment(), MenuProvider {
 
     private var _binding: FragmentTransactionsListBinding? = null
     private val binding get() = _binding!!
@@ -76,12 +74,12 @@ class TransactionsListFragment : Fragment(), MenuProvider { // Реализуе�
 
         setupRecyclerView()
         loadAndFilterTransactions() // Загружаем и фильтруем при создании
-        // addSampleDataIfNeeded() // Убираем добавление сэмплов по умолчанию
+        // addSampleDataIfNeeded() // Убираем добавление sample по умолчанию
     }
 
     // --- MenuProvider Implementation ---
     override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
-        menuInflater.inflate(R.menu.transactions_list_menu, menu) // Инфлейтим наше меню
+        menuInflater.inflate(R.menu.transactions_list_menu, menu) // Inflate наше меню
     }
 
     override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
@@ -204,7 +202,7 @@ class TransactionsListFragment : Fragment(), MenuProvider { // Реализуе�
     }
 
     private fun setupTypeFilterChips(chipGroup: ChipGroup) {
-        chipGroup.removeAllViews() // Очищаем перед добавлением
+        chipGroup.removeAllViews() // Очищаем перед добавлением.
         // Добавляем чипы для выбора типа
         val types = mapOf(
             null to "Все", // null соответствует отсутствию фильтра
@@ -325,7 +323,6 @@ class TransactionsListFragment : Fragment(), MenuProvider { // Реализуе�
             .show()
     }
 
-    // --- Остальные методы ---
     // Метод для публичного вызова обновления из MainActivity
     fun refreshTransactions() {
         Log.d("TransactionsList", "External refresh requested.")
@@ -335,5 +332,4 @@ class TransactionsListFragment : Fragment(), MenuProvider { // Реализуе�
         super.onDestroyView()
         _binding = null
     }
-    // ----------------------
 }

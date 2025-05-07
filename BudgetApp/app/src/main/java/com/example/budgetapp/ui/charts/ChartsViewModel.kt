@@ -9,7 +9,6 @@ import com.example.budgetapp.model.Category
 import com.example.budgetapp.model.ChartPeriod
 import java.util.Calendar
 import java.util.Date
-import java.util.concurrent.TimeUnit
 
 // Общий ViewModel для фрагментов статистики
 class ChartsViewModel : ViewModel() {
@@ -44,7 +43,7 @@ class ChartsViewModel : ViewModel() {
         _allCategories.value = SharedPreferencesManager.loadCategories().associateBy { it.id }
     }
 
-    // --- Вспомогательные функции для фильтрации (можно вынести в отдельный Util класс) ---
+    // --- Вспомогательные функции для фильтрации ---
 
     companion object {
         fun filterTransactionsByPeriod(transactions: List<Transaction>, period: ChartPeriod): List<Transaction> {
@@ -118,10 +117,5 @@ class ChartsViewModel : ViewModel() {
             calendar.set(Calendar.MILLISECOND, 0)
         }
 
-        // Для LineChart: получить количество дней между датами
-        fun daysBetween(startDate: Date, endDate: Date): Long {
-            val diff = endDate.time - startDate.time
-            return TimeUnit.DAYS.convert(diff, TimeUnit.MILLISECONDS)
-        }
     }
 }
